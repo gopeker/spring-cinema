@@ -1,0 +1,58 @@
+@if (loading) {
+  <div class="loading-spinner"></div>
+} @else if (movie) {
+  <div class="movie-header">
+    <div class="movie-poster-wrapper">
+      @if (movie.posterUrl) {
+        <img [src]="movie.posterUrl" [alt]="movie.title" class="movie-poster">
+      } @else {
+        <div class="movie-poster placeholder-gradient"></div>
+      }
+    </div>
+    <div class="movie-info">
+      <h1 class="movie-title">{{ movie.title }}</h1>
+      <p class="movie-description">{{ movie.description }}</p>
+      <p class="movie-duration">
+        <span class="duration-label">Duration:</span>
+        {{ formatDuration(movie.duration) }}
+      </p>
+      @if (movie.genre) {
+        <p class="movie-genre">
+          <span class="genre-badge">{{ movie.genre }}</span>
+        </p>
+      }
+    </div>
+  </div>
+
+  <section class="screenings-section">
+    <h2 class="section-title">Available Screenings</h2>
+    @if (groupedScreenings.length > 0) {
+      <div class="screenings-list">
+        @for (group of groupedScreenings; track group.date) {
+          <div class="screening-date-group">
+            <h4 class="screening-date">{{ group.date }}</h4>
+            <div class="screening-times">
+              @for (screening of group.screenings; track screening.id) {
+                <button 
+                  class="screening-badge"
+                  [routerLink]="['/screenings', screening.id, 'seats']">
+                  {{ formatTime(screening.startTime) }}
+                  <span class="showroom-tag">{{ screening.showroom?.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <p>No upcoming screenings available for this movie.</p>
+      </div>
+    }
+  </section>
+} @else {
+  <div class="empty-state">
+    <p>Movie not found</p>
+    <a routerLink="/home" class="btn-back">Back to Home</a>
+  </div>
+}

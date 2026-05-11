@@ -1,0 +1,42 @@
+:host ::ng-deep .card-cinema {
+  background: #1a1a2e;
+  border: none;
+}
+:host ::ng-deep .form-label {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+:host ::ng-deep .form-control-dark {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  color: #fff !important;
+}
+:host ::ng-deep .form-control-dark::placeholder {
+  color: #888;
+}
+:host ::ng-deep .form-control-dark:focus {
+  background: #16213e;
+  border-color: #e94560;
+  color: #fff;
+  box-shadow: none;
+}
+:host ::ng-deep h2 {
+  color: #fff;
+}
+:host ::ng-deep a {
+  color: #e94560;
+}
+:host ::ng-deep p {
+  color: #aaa;
+}
+:host ::ng-deep .btn-cinema {
+  background: #e94560;
+  border: none;
+  color: #fff;
+}
+.btn-cinema:hover {
+  background: #d63d56;
+}
+a {
+  color: #e94560;
+}

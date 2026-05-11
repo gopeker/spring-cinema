@@ -1,0 +1,51 @@
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1 class="page-title">My Tickets</h1>
+    @if (user) {
+      <p class="page-subtitle">Welcome back, {{ user.name }}</p>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <div class="spinner-border text-danger" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (tickets.length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-ticket-perforated empty-icon"></i>
+      <h3>No tickets yet</h3>
+      <p>Browse movies to get started</p>
+      <a routerLink="/" class="btn btn-cinema">Browse Movies</a>
+    </div>
+  } @else {
+    <div class="tickets-list">
+      @for (ticket of tickets; track ticket.id) {
+        <div class="ticket-card ticket-tear">
+          <div class="ticket-poster">
+            <img [src]="ticket.screening?.movie?.posterUrl || 'https://via.placeholder.com/80x120'" [alt]="ticket.screening?.movie?.title">
+          </div>
+          <div class="ticket-info">
+            <h4 class="ticket-movie-title">{{ ticket.screening?.movie?.title }}</h4>
+            <p class="ticket-showroom"><i class="bi bi-building"></i> {{ ticket.screening?.showroom?.name }}</p>
+            <p class="ticket-datetime">
+              <i class="bi bi-calendar"></i> {{ ticket.screening?.startTime | date:'MMM d, yyyy' }}
+              <i class="bi bi-clock ms-2"></i> {{ ticket.screening?.startTime | date:'h:mm a' }}
+            </p>
+            <p class="ticket-seat">
+              <i class="bi bi-chair"></i> Row {{ ticket.seatRow }}, Seat {{ ticket.seatNumber }}
+            </p>
+            <p class="ticket-price">\${{ ticket.price }}</p>
+            <span class="ticket-status" [class]="ticket.status.toLowerCase()">{{ ticket.status }}</span>
+          </div>
+          <div class="ticket-actions">
+            @if (ticket.status === 'CONFIRMED' && !isScreeningStarted(ticket.screening)) {
+              <button class="btn btn-cancel" (click)="cancelTicket(ticket.id)">Cancel</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

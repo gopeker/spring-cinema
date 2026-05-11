@@ -1,0 +1,146 @@
+.movie-header {
+  display: flex;
+  gap: 2rem;
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+.movie-poster-wrapper {
+  flex-shrink: 0;
+}
+.movie-poster {
+  width: 300px;
+  height: 450px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.movie-poster.placeholder-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.movie-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.movie-title {
+  font-size: 2.5rem;
+  color: #e94560;
+  margin-bottom: 1rem;
+}
+.movie-description {
+  color: #c0c0c0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+.movie-duration {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+.duration-label {
+  color: #a0a0a0;
+  margin-right: 0.5rem;
+}
+.genre-badge {
+  background: #e94560;
+  color: #fff;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+.screenings-section {
+  background: #16213e;
+  border-radius: 12px;
+  padding: 2rem;
+}
+.section-title {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #e94560;
+  padding-left: 1rem;
+}
+.screenings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.screening-date-group {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+.screening-date {
+  color: #e94560;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+.screening-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.screening-badge {
+  background: #16213e;
+  border: 2px solid #e94560;
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.screening-badge:hover {
+  background: #e94560;
+  transform: translateY(-2px);
+}
+.showroom-tag {
+  font-size: 0.8rem;
+  color: #a0a0a0;
+}
+.screening-badge:hover .showroom-tag {
+  color: #e0e0e0;
+}
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: #1a1a2e;
+  border-radius: 12px;
+  color: #a0a0a0;
+}
+.empty-state p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.btn-back {
+  color: #e94560;
+  text-decoration: none;
+}
+.btn-back:hover {
+  text-decoration: underline;
+}
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+.loading-spinner::after {
+  content: '';
+  width: 50px;
+  height: 50px;
+  border: 4px solid #2a2a4a;
+  border-top-color: #e94560;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

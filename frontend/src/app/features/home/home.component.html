@@ -1,0 +1,35 @@
+<div class="page-header">
+  <h1>Welcome to Spring Cinema</h1>
+  <p>Browse movies, choose your seats, and enjoy the show!</p>
+</div>
+
+@if (loading) {
+  <div class="loading-spinner"></div>
+} @else {
+  <section class="movies-section">
+    <h2 class="section-title">Now Showing</h2>
+    <div class="row g-4">
+      @for (movie of movies; track movie.id) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-cinema">
+            @if (movie.posterUrl) {
+              <img [src]="movie.posterUrl" [alt]="movie.title" class="movie-poster">
+            } @else {
+              <div class="movie-poster placeholder-gradient"></div>
+            }
+            <div class="card-body">
+              <h3 class="card-title">{{ movie.title }}</h3>
+              @if (movie.duration) {
+                <p class="card-duration">{{ movie.duration }} min</p>
+              }
+              @if (movie.description) {
+                <p class="card-description">{{ movie.description }}</p>
+              }
+              <a [routerLink]="['/movies', movie.id]" class="btn btn-primary">Get Tickets</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}

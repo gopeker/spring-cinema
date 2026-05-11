@@ -1,0 +1,403 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+:root {
+  --cinema-dark: #1a1a2e;
+  --cinema-primary: #e94560;
+  --cinema-secondary: #16213e;
+  --cinema-accent: #0f3460;
+  --cinema-gold: #f5c518;
+  --cinema-text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, var(--cinema-dark) 0%, var(--cinema-secondary) 100%);
+  color: var(--cinema-text);
+  min-height: 100vh;
+}
+
+.navbar-cinema {
+  background: rgba(22, 33, 62, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+  padding: 0.75rem 2rem;
+}
+
+.navbar-cinema .navbar-brand {
+  color: var(--cinema-primary) !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.navbar-cinema .nav-link {
+  color: var(--cinema-text) !important;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.navbar-cinema .nav-link:hover {
+  opacity: 1;
+  color: var(--cinema-primary) !important;
+}
+
+.navbar-cinema .nav-link.active {
+  color: var(--cinema-primary) !important;
+  opacity: 1;
+}
+
+.btn-cinema {
+  background: linear-gradient(135deg, var(--cinema-primary) 0%, #c23a51 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+}
+
+.btn-cinema:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+  color: white;
+}
+
+.btn-cinema-outline {
+  background: transparent;
+  border: 2px solid var(--cinema-primary);
+  color: var(--cinema-primary);
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.btn-cinema-outline:hover {
+  background: var(--cinema-primary);
+  color: white;
+}
+
+.card-cinema {
+  background: rgba(22, 33, 62, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card-cinema:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-color: var(--cinema-primary);
+}
+
+.card-cinema img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card-cinema:hover img {
+  transform: scale(1.05);
+}
+
+.card-cinema .card-body {
+  padding: 1.25rem;
+}
+
+.card-cinema .card-title {
+  color: var(--cinema-text);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-cinema .card-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.seat-screen {
+  background: linear-gradient(to bottom, rgba(233, 69, 96, 0.3), transparent);
+  height: 40px;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem auto 1.5rem;
+  max-width: 60%;
+}
+
+.seat-grid {
+  display: grid;
+  gap: 6px;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.seat {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px 6px 8px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.seat.available {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  color: white;
+}
+
+.seat.available:hover {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.seat.selected {
+  background: linear-gradient(135deg, var(--cinema-gold) 0%, #c9a000 100%) !important;
+  color: #1a1a2e;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(245, 197, 24, 0.5);
+  border-color: #fff;
+}
+
+.seat.taken {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.seat.premium {
+  background: linear-gradient(135deg, #9c27b0 0%, #6a1b9a 100%);
+}
+
+.seat.premium:hover {
+  background: linear-gradient(135deg, #ab47bc 0%, #9c27b0 100%) !important;
+}
+
+.seat.economy {
+  background: linear-gradient(135deg, #f57c00 0%, #e65100 100%) !important;
+}
+
+.seat.economy:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+}
+
+.row-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+}
+
+.movie-poster {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(233, 69, 96, 0.3);
+}
+
+.movie-poster img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.badge-tier {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.badge-premium {
+  background: linear-gradient(135deg, #9c27b0 0%, #6a1b9a 100%);
+}
+
+.badge-standard {
+  background: linear-gradient(135deg, var(--cinema-accent) 0%, var(--cinema-secondary) 100%);
+}
+
+.badge-economy {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+}
+
+.page-header {
+  background: rgba(22, 33, 62, 0.5);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(233, 69, 96, 0.2);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  color: var(--cinema-text);
+  font-weight: 800;
+  margin: 0;
+}
+
+.page-header p {
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0.5rem 0 0;
+}
+
+.form-control-dark {
+  background: rgba(22, 33, 62, 0.8);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  color: var(--cinema-text);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.form-control-dark:focus {
+  background: rgba(22, 33, 62, 0.9);
+  border-color: var(--cinema-primary);
+  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+  color: var(--cinema-text);
+  outline: none;
+}
+
+.form-control-dark::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ticket-card {
+  background: linear-gradient(135deg, rgba(22, 33, 62, 0.9) 0%, rgba(15, 52, 96, 0.9) 100%);
+  border: 2px solid rgba(233, 69, 96, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ticket-card:hover {
+  border-color: var(--cinema-primary);
+  box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+}
+
+.ticket-tear {
+  position: relative;
+}
+
+.ticket-tear::before,
+.ticket-tear::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: var(--cinema-dark);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.ticket-tear::before {
+  left: -10px;
+}
+
+.ticket-tear::after {
+  right: -10px;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.footer-cinema {
+  background: rgba(22, 33, 62, 0.5);
+  border-top: 1px solid rgba(233, 69, 96, 0.2);
+  padding: 2rem 0;
+  margin-top: 4rem;
+}
+
+.text-cinema-primary {
+  color: var(--cinema-primary) !important;
+}
+
+.text-cinema-gold {
+  color: var(--cinema-gold) !important;
+}
+
+.bg-cinema-dark {
+  background: rgba(22, 33, 62, 0.8) !important;
+}
+
+.alert-cinema {
+  background: rgba(233, 69, 96, 0.15);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 12px;
+  color: var(--cinema-text);
+}
+
+.screening-time {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: rgba(15, 52, 96, 0.8);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.screening-time:hover {
+  background: rgba(233, 69, 96, 0.2);
+  border-color: var(--cinema-primary);
+  transform: scale(1.05);
+}
+
+.screening-time.selected {
+  background: var(--cinema-primary);
+  border-color: var(--cinema-primary);
+  color: white;
+}
+
+.price-display {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--cinema-gold);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: rgba(233, 69, 96, 0.4);
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: var(--cinema-text);
+  font-weight: 700;
+}
+
+.empty-state p {
+  color: rgba(255, 255, 255, 0.6);
+}

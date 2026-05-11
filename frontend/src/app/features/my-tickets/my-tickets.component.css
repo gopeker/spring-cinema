@@ -1,0 +1,120 @@
+.page-header {
+  text-align: center;
+  padding: 20px 0;
+}
+.page-title {
+  color: #fff;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+.page-subtitle {
+  color: #aaa;
+  font-size: 1.1rem;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #1a1a2e;
+  border-radius: 12px;
+}
+.empty-icon {
+  font-size: 4rem;
+  color: #e94560;
+  margin-bottom: 1rem;
+}
+.empty-state h3 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.empty-state p {
+  color: #aaa;
+  margin-bottom: 1.5rem;
+}
+.tickets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.ticket-card {
+  display: flex;
+  gap: 1.5rem;
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.ticket-poster img {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.ticket-info {
+  flex: 1;
+}
+.ticket-movie-title {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+.ticket-showroom, .ticket-datetime, .ticket-seat, .ticket-price {
+  color: #aaa;
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+}
+.ticket-price {
+  color: #e94560;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.ticket-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+.ticket-status.confirmed {
+  background: #1b4332;
+  color: #40916c;
+}
+.ticket-status.cancelled {
+  background: #5c1a1a;
+  color: #e63946;
+}
+.ticket-actions {
+  display: flex;
+  align-items: center;
+}
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #e63946;
+  color: #e63946;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-cancel:hover {
+  background: #e63946;
+  color: #fff;
+}
+.btn-cinema {
+  background: #e94560;
+  border: none;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.btn-cinema:hover {
+  background: #d63d56;
+  color: #fff;
+}
