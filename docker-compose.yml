@@ -25,6 +25,30 @@ services:
     networks:
       - spring-network
 
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-llm
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./ollama-entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+    networks:
+      - spring-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   # Spring Boot Application
   spring-app:
     build:
@@ -37,6 +61,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
+      SPRING_AI_OPENAI_BASE_URL: http://ollama:11434
+      SPRING_AI_OPENAI_CHAT_OPTIONS_MODEL: qwen2.5:1.5b
+      SPRING_AI_OPENAI_CHAT_OPTIONS_TEMPERATURE: "0.7"
+      SPRING_AI_OPENAI_API_KEY: dummy-key
     ports:
       - "8080:8080"
     depends_on:
@@ -53,6 +81,8 @@ services:
 
 volumes:
   postgres-data:
+    driver: local
+  ollama-data:
     driver: local
 
 networks:

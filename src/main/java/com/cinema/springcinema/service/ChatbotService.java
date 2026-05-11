@@ -45,9 +45,9 @@ public class ChatbotService {
         }
 
         prompt.append("\nGuidelines:\n");
-        prompt.append("- Recommend movies from our list\n");
+        prompt.append("- Recommend only movies from our list\n");
         prompt.append("- Ask about preferences\n");
-        prompt.append("- Be friendly\n");
+        prompt.append("- Be friendly and brief\n");
         prompt.append("- Remember user preferences\n");
         prompt.append("- Direct showtime questions to the movie page\n");
 
