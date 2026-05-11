@@ -1,0 +1,45 @@
+<div class="chatbot-container">
+  <div class="chatbot-header">
+    <h4>Movie Chatbot</h4>
+    <small>Ask me for movie recommendations!</small>
+  </div>
+  
+  <div class="chatbot-messages" #messagesContainer>
+    @for (msg of messages; track $index) {
+      <div class="message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
+        <div class="message-content">{{ msg.content }}</div>
+        @if (msg.movies && msg.movies.length > 0) {
+          <div class="movie-links">
+            @for (movie of msg.movies; track movie.id) {
+              <a [routerLink]="['/movies', movie.id]" class="movie-link">
+                <i class="bi bi-film me-1"></i>{{ movie.title }}
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
+    @if (loading) {
+      <div class="message bot">
+        <div class="message-content loading">
+          <span class="typing"></span>
+          <span class="typing"></span>
+          <span class="typing"></span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="chatbot-input">
+    <input 
+      type="text" 
+      [(ngModel)]="userInput" 
+      (keydown)="onKeyDown($event)"
+      placeholder="Ask me about movies..."
+      [disabled]="loading"
+    >
+    <button (click)="sendMessage()" [disabled]="loading || !userInput.trim()">
+      <i class="bi bi-send"></i>
+    </button>
+  </div>
+</div>

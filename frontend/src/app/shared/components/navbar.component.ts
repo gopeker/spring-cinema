@@ -18,6 +18,11 @@ import { AuthService } from '../../core/services/auth.service';
             <li class="nav-item">
               <a class="nav-link" routerLink="/">Movies</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/chatbot">
+                <i class="bi bi-chat-dots me-1"></i>Chat
+              </a>
+            </li>
             @if (auth.isAdmin()) {
               <li class="nav-item">
                 <a class="nav-link" routerLink="/admin/movies">Admin</a>
