@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { TicketService } from '../../core/services/ticket.service';
 import { AuthService } from '../../core/services/auth.service';
+import { Ticket, Screening } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-my-tickets',
@@ -17,7 +17,7 @@ export class MyTicketsComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  tickets = signal<any[]>([]);
+  tickets = signal<Ticket[]>([]);
   loading = signal(true);
   user = this.authService.currentUser;
 
@@ -54,8 +54,8 @@ export class MyTicketsComponent implements OnInit {
     }
   }
 
-  isScreeningStarted(screening: any): boolean {
-    if (!screening || !screening.startTime) return false;
+  isScreeningStarted(screening: Screening): boolean {
+    if (!screening?.startTime) return false;
     return new Date(screening.startTime) < new Date();
   }
 }

@@ -7,6 +7,7 @@ import { TicketService } from '../../core/services/ticket.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ScreeningService } from '../../core/services/screening.service';
 import { BookingService } from '../../core/services/booking.service';
+import { Screening, Ticket } from '../../core/models/api.models';
 import { formatDate, formatTime } from '../../shared/utils/cinema-format.utils';
 
 @Component({
@@ -23,13 +24,12 @@ export class CheckoutComponent implements OnInit {
   private screeningService = inject(ScreeningService);
   private bookingService = inject(BookingService);
 
-  // read directly from booking service
   selectedSeats = this.bookingService.selectedSeats;
   screeningId = this.bookingService.screeningId;
   totalPrice = this.bookingService.totalPrice;
 
-  screening = signal<any>(null);
-  purchasedTickets = signal<any[]>([]);
+  screening = signal<Screening | null>(null);
+  purchasedTickets = signal<Ticket[]>([]);
   loading = signal(false);
   error = signal('');
   loginError = signal('');

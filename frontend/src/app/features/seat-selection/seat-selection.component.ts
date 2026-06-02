@@ -1,17 +1,10 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScreeningService } from '../../core/services/screening.service';
 import { BookingService, SelectedSeat } from '../../core/services/booking.service';
+import { Screening, Seat } from '../../core/models/api.models';
 import { formatDate, formatTime } from '../../shared/utils/cinema-format.utils';
-
-interface Seat {
-  seatRow: string;
-  seatNumber: number;
-  tier: string;
-  available: boolean;
-  price: number;
-}
 
 @Component({
   selector: 'app-seat-selection',
@@ -26,13 +19,12 @@ export class SeatSelectionComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  screening = signal<any>(null);
+  screening = signal<Screening | null>(null);
   seats = signal<Seat[]>([]);
   seatRows = signal<string[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
 
-  // delegate selection state to the booking service
   selectedSeats = this.bookingService.selectedSeats;
   totalPrice = this.bookingService.totalPrice;
 
@@ -96,7 +88,8 @@ export class SeatSelectionComponent implements OnInit {
   }
 
   proceedToCheckout(): void {
-    this.bookingService.screeningId.set(this.screening().id);
+    const s = this.screening();
+    if (s) this.bookingService.screeningId.set(s.id);
     this.router.navigate(['/checkout']);
   }
 

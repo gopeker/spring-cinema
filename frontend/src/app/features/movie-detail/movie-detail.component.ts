@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { MovieService } from '../../core/services/movie.service';
 import { ScreeningService } from '../../core/services/screening.service';
+import { Movie, Screening, ScreeningGroup } from '../../core/models/api.models';
 import { formatTime, formatDuration } from '../../shared/utils/cinema-format.utils';
 
 @Component({
@@ -16,11 +17,10 @@ export class MovieDetailComponent implements OnInit {
   private movieService = inject(MovieService);
   private screeningService = inject(ScreeningService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
 
-  movie = signal<any>(null);
-  screenings = signal<any[]>([]);
-  groupedScreenings = signal<{ date: string; screenings: any[] }[]>([]);
+  movie = signal<Movie | null>(null);
+  screenings = signal<Screening[]>([]);
+  groupedScreenings = signal<ScreeningGroup[]>([]);
   loading = signal(true);
   private loadCount = 0;
 
@@ -70,11 +70,11 @@ export class MovieDetailComponent implements OnInit {
     }
   }
 
-  private groupScreenings(screenings: any[]): void {
+  private groupScreenings(screenings: Screening[]): void {
     const now = new Date();
     const upcoming = screenings.filter(s => new Date(s.startTime) > now);
-    
-    const groups = new Map<string, any[]>();
+
+    const groups = new Map<string, Screening[]>();
     upcoming.forEach(screening => {
       const date = new Date(screening.startTime).toLocaleDateString('en-US', {
         weekday: 'long',
@@ -82,9 +82,7 @@ export class MovieDetailComponent implements OnInit {
         month: 'long',
         day: 'numeric'
       });
-      if (!groups.has(date)) {
-        groups.set(date, []);
-      }
+      if (!groups.has(date)) groups.set(date, []);
       groups.get(date)!.push(screening);
     });
 

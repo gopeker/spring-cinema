@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MovieService } from '../../core/services/movie.service';
+import { Movie } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-home',
@@ -13,7 +14,7 @@ import { MovieService } from '../../core/services/movie.service';
 export class HomeComponent implements OnInit {
   private movieService = inject(MovieService);
 
-  movies = signal<any[]>([]);
+  movies = signal<Movie[]>([]);
   loading = signal(true);
 
   ngOnInit(): void {

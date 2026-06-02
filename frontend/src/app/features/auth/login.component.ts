@@ -21,14 +21,8 @@ export class LoginComponent {
   onSubmit() {
     this.error = '';
     this.auth.login(this.email, this.password).subscribe({
-      next: (res) => {
-        this.auth.saveToken(res.token);
-        this.auth.saveUser(res.user);
-        this.router.navigate(['/']);
-      },
-      error: () => {
-        this.error = 'Invalid email or password';
-      }
+      next: () => this.router.navigate(['/']),
+      error: () => { this.error = 'Invalid email or password'; }
     });
   }
 }

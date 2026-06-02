@@ -1,24 +1,24 @@
 @if (loading()) {
   <div class="loading-spinner"></div>
-} @else if (movie()) {
+} @else if (movie(); as m) {
   <div class="movie-header">
     <div class="movie-poster-wrapper">
-      @if (movie().posterUrl) {
-        <img [src]="movie().posterUrl" [alt]="movie().title" class="movie-poster">
+      @if (m.posterUrl) {
+        <img [src]="m.posterUrl" [alt]="m.title" class="movie-poster">
       } @else {
         <div class="movie-poster placeholder-gradient"></div>
       }
     </div>
     <div class="movie-info">
-      <h1 class="movie-title">{{ movie().title }}</h1>
-      <p class="movie-description">{{ movie().description }}</p>
+      <h1 class="movie-title">{{ m.title }}</h1>
+      <p class="movie-description">{{ m.description }}</p>
       <p class="movie-duration">
         <span class="duration-label">Duration:</span>
-        {{ formatDuration(movie().duration) }}
+        {{ formatDuration(m.duration) }}
       </p>
-      @if (movie().genre) {
+      @if (m.genre) {
         <p class="movie-genre">
-          <span class="genre-badge">{{ movie().genre }}</span>
+          <span class="genre-badge">{{ m.genre }}</span>
         </p>
       }
     </div>
@@ -33,11 +33,11 @@
             <h4 class="screening-date">{{ group.date }}</h4>
             <div class="screening-times">
               @for (screening of group.screenings; track screening.id) {
-                <button 
+                <button
                   class="screening-badge"
                   [routerLink]="['/screenings', screening.id, 'seats']">
                   {{ formatTime(screening.startTime) }}
-                  <span class="showroom-tag">{{ screening.showroom?.name }}</span>
+                  <span class="showroom-tag">{{ screening.showroom.name }}</span>
                 </button>
               }
             </div>

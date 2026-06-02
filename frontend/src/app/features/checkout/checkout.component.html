@@ -30,22 +30,22 @@
       <div class="card-body">
         <h5 class="card-title mb-4">Order Summary</h5>
 
-        @if (screening()) {
+        @if (screening(); as s) {
           <div class="summary-movie mb-4">
             <div class="row align-items-center">
               <div class="col-md-2">
-                @if (screening()?.movie?.posterUrl) {
-                  <img [src]="screening().movie.posterUrl" class="summary-poster" alt="Movie poster">
+                @if (s.movie.posterUrl) {
+                  <img [src]="s.movie.posterUrl" class="summary-poster" alt="Movie poster">
                 } @else {
                   <div class="summary-poster placeholder"></div>
                 }
               </div>
               <div class="col-md-10">
-                <h4 class="summary-title">{{ screening()?.movie?.title }}</h4>
+                <h4 class="summary-title">{{ s.movie.title }}</h4>
                 <div class="summary-details">
-                  <span class="me-3"><i class="bi bi-building me-1"></i>{{ screening()?.showroom?.name }}</span>
-                  <span class="me-3"><i class="bi bi-calendar me-1"></i>{{ formatDate(screening()?.startTime) }}</span>
-                  <span><i class="bi bi-clock me-1"></i>{{ formatTime(screening()?.startTime) }}</span>
+                  <span class="me-3"><i class="bi bi-building me-1"></i>{{ s.showroom.name }}</span>
+                  <span class="me-3"><i class="bi bi-calendar me-1"></i>{{ formatDate(s.startTime) }}</span>
+                  <span><i class="bi bi-clock me-1"></i>{{ formatTime(s.startTime) }}</span>
                 </div>
               </div>
             </div>
@@ -107,52 +107,54 @@
       <h4 class="text-success">Purchase Successful!</h4>
       <p class="text-muted">Your tickets have been confirmed.</p>
     </div>
-    <div class="row justify-content-center">
-      @for (ticket of purchasedTickets(); track ticket.id) {
-        <div class="col-md-5 mb-4">
-          <div class="ticket-card p-3">
-            <div class="ticket-header mb-3">
-              <div class="d-flex align-items-center gap-3">
-                @if (screening()?.movie?.posterUrl) {
-                  <img [src]="screening().movie.posterUrl" class="ticket-poster" alt="Movie poster">
-                } @else {
-                  <div class="ticket-poster placeholder"></div>
-                }
-                <div class="flex-grow-1">
-                  <strong class="ticket-movie-title">{{ screening()?.movie?.title }}</strong>
-                  <div class="ticket-showroom">{{ screening()?.showroom?.name }}</div>
+    @if (screening(); as s) {
+      <div class="row justify-content-center">
+        @for (ticket of purchasedTickets(); track ticket.id) {
+          <div class="col-md-5 mb-4">
+            <div class="ticket-card p-3">
+              <div class="ticket-header mb-3">
+                <div class="d-flex align-items-center gap-3">
+                  @if (s.movie.posterUrl) {
+                    <img [src]="s.movie.posterUrl" class="ticket-poster" alt="Movie poster">
+                  } @else {
+                    <div class="ticket-poster placeholder"></div>
+                  }
+                  <div class="flex-grow-1">
+                    <strong class="ticket-movie-title">{{ s.movie.title }}</strong>
+                    <div class="ticket-showroom">{{ s.showroom.name }}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="ticket-info">
-              <div class="row mb-2">
-                <div class="col-6">
-                  <div class="ticket-label">Date</div>
-                  <div class="ticket-value">{{ formatDate(screening()?.startTime) }}</div>
+              <div class="ticket-info">
+                <div class="row mb-2">
+                  <div class="col-6">
+                    <div class="ticket-label">Date</div>
+                    <div class="ticket-value">{{ formatDate(s.startTime) }}</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="ticket-label">Time</div>
+                    <div class="ticket-value">{{ formatTime(s.startTime) }}</div>
+                  </div>
                 </div>
-                <div class="col-6">
-                  <div class="ticket-label">Time</div>
-                  <div class="ticket-value">{{ formatTime(screening()?.startTime) }}</div>
+                <div class="row mb-2">
+                  <div class="col-6">
+                    <div class="ticket-label">Row</div>
+                    <div class="ticket-value">{{ ticket.seatRow }}</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="ticket-label">Seat</div>
+                    <div class="ticket-value">{{ ticket.seatNumber }}</div>
+                  </div>
                 </div>
               </div>
-              <div class="row mb-2">
-                <div class="col-6">
-                  <div class="ticket-label">Row</div>
-                  <div class="ticket-value">{{ ticket.seatRow }}</div>
-                </div>
-                <div class="col-6">
-                  <div class="ticket-label">Seat</div>
-                  <div class="ticket-value">{{ ticket.seatNumber }}</div>
-                </div>
+              <div class="text-center mt-3">
+                <span class="ticket-id">Ticket #{{ ticket.id }}</span>
               </div>
-            </div>
-            <div class="text-center mt-3">
-              <span class="ticket-id">Ticket #{{ ticket.id }}</span>
             </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
     <div class="text-center">
       <a routerLink="/my-tickets" class="btn btn-cinema">View My Tickets</a>
     </div>

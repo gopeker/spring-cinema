@@ -22,14 +22,8 @@ export class RegisterComponent {
   onSubmit() {
     this.error = '';
     this.auth.register(this.name, this.email, this.password).subscribe({
-      next: (res) => {
-        this.auth.saveToken(res.token);
-        this.auth.saveUser(res.user);
-        this.router.navigate(['/']);
-      },
-      error: () => {
-        this.error = 'Registration failed. Please try again.';
-      }
+      next: () => this.router.navigate(['/']),
+      error: () => { this.error = 'Registration failed. Please try again.'; }
     });
   }
 }

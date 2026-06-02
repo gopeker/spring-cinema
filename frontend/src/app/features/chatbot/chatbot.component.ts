@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef, afterNextRender, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -18,11 +18,12 @@ interface Message {
   templateUrl: './chatbot.component.html',
   styleUrl: './chatbot.component.css'
 })
-export class ChatbotComponent implements AfterViewChecked {
+export class ChatbotComponent {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   private chatbotService = inject(ChatbotService);
   private movieService = inject(MovieService);
+  private injector = inject(Injector);
 
   messages = signal<Message[]>([{
     role: 'bot',
@@ -32,7 +33,6 @@ export class ChatbotComponent implements AfterViewChecked {
   loading = signal(false);
 
   private allMovies: { id: number; title: string }[] = [];
-  private shouldScroll = true;
 
   constructor() {
     this.movieService.getAll().subscribe({
@@ -40,19 +40,16 @@ export class ChatbotComponent implements AfterViewChecked {
         this.allMovies = movies.map(m => ({ id: m.id, title: m.title }));
       }
     });
+    this.scheduleScroll();
   }
 
-  ngAfterViewChecked() {
-    if (this.shouldScroll) {
-      this.scrollToBottom();
-      this.shouldScroll = false;
-    }
-  }
-
-  private scrollToBottom(): void {
-    try {
-      this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-    } catch(err) {}
+  private scheduleScroll(): void {
+    afterNextRender(() => {
+      try {
+        this.messagesContainer.nativeElement.scrollTop =
+          this.messagesContainer.nativeElement.scrollHeight;
+      } catch { /* messagesContainer not yet available */ }
+    }, { injector: this.injector });
   }
 
   sendMessage(): void {
@@ -60,16 +57,16 @@ export class ChatbotComponent implements AfterViewChecked {
 
     const userMessage = this.userInput().trim();
     this.messages.update(msgs => [...msgs, { role: 'user', content: userMessage }]);
-    this.shouldScroll = true;
+    this.scheduleScroll();
     this.userInput.set('');
     this.loading.set(true);
 
     this.chatbotService.chat(userMessage).subscribe({
-      next: (res: any) => {
-        const responseText = res?.response || res?.message || 'No response';
+      next: (res) => {
+        const responseText = res.response || 'No response';
         const movies = this.extractMovies(responseText);
         this.messages.update(msgs => [...msgs, { role: 'bot', content: responseText, movies }]);
-        this.shouldScroll = true;
+        this.scheduleScroll();
         this.loading.set(false);
       },
       error: (err) => {
@@ -78,7 +75,7 @@ export class ChatbotComponent implements AfterViewChecked {
           role: 'bot',
           content: 'Sorry, I\'m having trouble connecting. Make sure LM Studio is running with Gemma 4 loaded.'
         }]);
-        this.shouldScroll = true;
+        this.scheduleScroll();
         this.loading.set(false);
       }
     });
