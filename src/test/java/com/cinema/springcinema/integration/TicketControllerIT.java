@@ -1,24 +1,26 @@
 package com.cinema.springcinema.integration;
 
-import com.cinema.springcinema.integration.IntegrationTest;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @IntegrationTest
 class TicketControllerIT extends BaseIntegrationTest {
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    /** Returns [screeningId, seatRow, seatNumber] for a free seat in a future screening. */
-    private long[] resolveFreeSeat() throws Exception {
+    /**
+     * Returns [screeningId, seatRowChar, seatNumber] for a free seat in the
+     * screening at the given index in the upcoming list.
+     * Each test uses a different screeningIndex (0..N) so they don't collide.
+     */
+    private long[] resolveFreeSeat(int screeningIndex) throws Exception {
         String screeningsJson = mockMvc.perform(get("/api/screenings"))
                 .andReturn().getResponse().getContentAsString();
-        long screeningId = objectMapper.readTree(screeningsJson).get(0).get("id").asLong();
+        long screeningId = objectMapper.readTree(screeningsJson).get(screeningIndex).get("id").asLong();
 
         String seatsJson = mockMvc.perform(get("/api/screenings/" + screeningId + "/seats"))
                 .andReturn().getResponse().getContentAsString();
@@ -33,7 +35,7 @@ class TicketControllerIT extends BaseIntegrationTest {
                 };
             }
         }
-        throw new IllegalStateException("No available seat found in test data");
+        throw new IllegalStateException("No available seat in screening at index " + screeningIndex);
     }
 
     // ─── GET /api/tickets/me ──────────────────────────────────────────────────
@@ -69,7 +71,7 @@ class TicketControllerIT extends BaseIntegrationTest {
     @Test
     void purchaseTicket_validSeat_returnsTicket() throws Exception {
         String token = registerAndGetToken("TicketUser2", "ticketuser2@it.com", "password123");
-        long[] seat = resolveFreeSeat();
+        long[] seat = resolveFreeSeat(0);   // screening index 0
 
         mockMvc.perform(post("/api/tickets")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,16 +91,16 @@ class TicketControllerIT extends BaseIntegrationTest {
     void purchaseTicket_sameSetTwice_returns400() throws Exception {
         String token1 = registerAndGetToken("TicketUser3", "ticketuser3@it.com", "password123");
         String token2 = registerAndGetToken("TicketUser4", "ticketuser4@it.com", "password123");
-        long[] seat = resolveFreeSeat();
+        long[] seat = resolveFreeSeat(1);   // screening index 1
 
         String body = """
                 {"screeningId":%d,"seatRow":"%s","seatNumber":%d}
                 """.formatted(seat[0], (char) seat[1], seat[2]);
 
         mockMvc.perform(post("/api/tickets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", token1)
-                .content(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", token1)
+                        .content(body))
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/tickets")
@@ -112,7 +114,7 @@ class TicketControllerIT extends BaseIntegrationTest {
     @Test
     void purchaseTicket_appearsInMyTickets() throws Exception {
         String token = registerAndGetToken("TicketUser5", "ticketuser5@it.com", "password123");
-        long[] seat = resolveFreeSeat();
+        long[] seat = resolveFreeSeat(2);   // screening index 2
 
         mockMvc.perform(post("/api/tickets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +135,7 @@ class TicketControllerIT extends BaseIntegrationTest {
     @Test
     void cancelTicket_ownTicket_returns204() throws Exception {
         String token = registerAndGetToken("TicketUser6", "ticketuser6@it.com", "password123");
-        long[] seat = resolveFreeSeat();
+        long[] seat = resolveFreeSeat(3);   // screening index 3
 
         String purchaseResponse = mockMvc.perform(post("/api/tickets")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -152,9 +154,9 @@ class TicketControllerIT extends BaseIntegrationTest {
 
     @Test
     void cancelTicket_anotherUsersTicket_returns403() throws Exception {
-        String owner  = registerAndGetToken("TicketUser7", "ticketuser7@it.com", "password123");
-        String other  = registerAndGetToken("TicketUser8", "ticketuser8@it.com", "password123");
-        long[] seat   = resolveFreeSeat();
+        String owner = registerAndGetToken("TicketUser7", "ticketuser7@it.com", "password123");
+        String other = registerAndGetToken("TicketUser8", "ticketuser8@it.com", "password123");
+        long[] seat  = resolveFreeSeat(4);  // screening index 4
 
         String purchaseResponse = mockMvc.perform(post("/api/tickets")
                         .contentType(MediaType.APPLICATION_JSON)

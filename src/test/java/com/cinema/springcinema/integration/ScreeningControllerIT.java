@@ -1,12 +1,11 @@
 package com.cinema.springcinema.integration;
 
-import com.cinema.springcinema.integration.IntegrationTest;
-
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @IntegrationTest
 class ScreeningControllerIT extends BaseIntegrationTest {

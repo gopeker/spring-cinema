@@ -2,6 +2,7 @@ package com.cinema.springcinema.integration;
 
 import com.cinema.springcinema.dto.AuthResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -42,8 +43,10 @@ public abstract class BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @Autowired
-    protected ObjectMapper objectMapper;
+    // Instantiated directly to avoid auto-configuration ordering issues
+    // with @DirtiesContext across Failsafe-managed IT classes.
+    protected final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
 
     protected MockMvc mockMvc;
 
