@@ -72,14 +72,14 @@
                 <tr>
                   <td>{{ seat.seatRow }}</td>
                   <td>{{ seat.seatNumber }}</td>
-                  <td>\${{ seat.price.toFixed(2) }}</td>
+                  <td>${{ seat.price.toFixed(2) }}</td>
                 </tr>
               }
             </tbody>
             <tfoot>
               <tr>
                 <td colspan="2" class="text-end"><strong>Total:</strong></td>
-                <td><span class="price-display">\${{ totalPrice.toFixed(2) }}</span></td>
+                <td><span class="price-display">${{ totalPrice.toFixed(2) }}</span></td>
               </tr>
             </tfoot>
           </table>

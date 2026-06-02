@@ -36,7 +36,7 @@
             <p class="ticket-seat">
               <i class="bi bi-chair"></i> Row {{ ticket.seatRow }}, Seat {{ ticket.seatNumber }}
             </p>
-            <p class="ticket-price">\${{ ticket.price }}</p>
+            <p class="ticket-price">${{ ticket.price }}</p>
             <span class="ticket-status" [class]="ticket.status.toLowerCase()">{{ ticket.status }}</span>
           </div>
           <div class="ticket-actions">
