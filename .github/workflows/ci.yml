@@ -53,10 +53,11 @@ jobs:
           SPRING_AI_OPENAI_API_KEY: dummy-key
         run: ./mvnw -B verify
 
-      - name: Build frontend (production)
+      - name: Test and build frontend
         run: |
           cd frontend
           npm ci
+          npm test -- --watch=false
           npm run build -- --configuration production
 
   docker:

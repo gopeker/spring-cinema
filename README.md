@@ -21,15 +21,16 @@ docker compose down -v && docker compose up -d
 
 ## Services
 
-| Service | URL |
-|---------|-----|
-| Spring App | http://localhost:8080 |
-| PostgreSQL | localhost:5432 |
-| Ollama | http://localhost:11434 |
+| Service          | URL |
+|------------------|-----|
+| Angular Frontend | http://localhost |
+| Spring App       | http://localhost:8080 |
+| PostgreSQL       | localhost:5432 |
+| Ollama           | http://localhost:11434 |
 
 ## Chatbot
 
-Access the AI chatbot at: http://localhost:8080/chatbot
+Access the AI chatbot at: http://localhost/chatbot
 
 The chatbot uses Qwen 2.5 1.5B model via Ollama and remembers conversation history.
 
