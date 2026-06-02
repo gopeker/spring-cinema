@@ -1,58 +1,58 @@
 # Multi-stage Dockerfile for Spring Boot application
-# Uses Eclipse Temurin official Java images for optimal performance
 
-# Build stage
+# Java build stage
 FROM eclipse-temurin:25-jdk-jammy AS build
 
-# Set working directory
+# Install Node.js
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml (dependency caching layer)
+# Copy Maven wrapper and pom.xml
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 RUN chmod +x mvnw
 
-# Download dependencies
+# Download Maven dependencies
 RUN ./mvnw dependency:go-offline
 
 # Copy source code
 COPY src ./src
 
-# Copy frontend directory if present (for fullstack projects with frontend-maven-plugin)
-# If no frontend/ exists, comment out or remove this line
+# Build Angular frontend
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install --no-audit --no-fund
+
 COPY frontend ./frontend
+
+# Build Angular and copy to Spring static resources
+RUN cd frontend && npm run build -- --configuration production && mkdir -p ../src/main/resources/static && cp -r ./dist/spring-cinema-browser/* ../src/main/resources/static/ 2>/dev/null || cp -r ./dist/* ../src/main/resources/static/
 
 # Build the application
 RUN ./mvnw clean package -DskipTests
 
-# Runtime stage (Alpine-based for smaller image ~100 MB vs ~220 MB)
+# Runtime stage
 FROM eclipse-temurin:25-jre-alpine
 
-# Install curl for healthchecks
 RUN apk add --no-cache curl
 
-# Create non-root user
 RUN adduser -D -u 1001 springboot
 
-# Set working directory
 WORKDIR /app
 
-# Copy the JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Change ownership
 RUN chown -R springboot:springboot /app
 
-# Switch to non-root user
 USER springboot
 
-# Expose port
 EXPOSE 8080
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run the application with optimized JVM flags
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

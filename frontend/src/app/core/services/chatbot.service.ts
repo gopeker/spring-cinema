@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ChatbotService {
-  private baseUrl = 'http://localhost:8080/api/chatbot';
+  private baseUrl = '/api/chatbot';
 
   constructor(private http: HttpClient) {}
 

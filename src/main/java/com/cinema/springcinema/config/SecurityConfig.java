@@ -45,9 +45,6 @@ public class SecurityConfig {
                         .requestMatchers("/static/**").permitAll()
                         .requestMatchers("/assets/**").permitAll()
                         .requestMatchers("/media/**").permitAll()
-                        .requestMatchers("/chunk-**").permitAll()
-                        .requestMatchers("/styles-**").permitAll()
-                        .requestMatchers("/main-**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/chatbot/**").permitAll()
@@ -57,7 +54,6 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/movies/**", "/tickets", "/login", "/register", "/checkout", "/chatbot").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

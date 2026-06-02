@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class TicketService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api/tickets';
+  private baseUrl = '/api/tickets';
 
   purchase(screeningId: number, seatRow: string, seatNumber: number): Observable<any> {
     return this.http.post<any>(this.baseUrl, { screeningId, seatRow, seatNumber });
