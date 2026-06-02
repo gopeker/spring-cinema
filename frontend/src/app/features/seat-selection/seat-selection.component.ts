@@ -1,21 +1,15 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ScreeningService } from '../../core/services/screening.service';
-import { TicketService } from '../../core/services/ticket.service';
-import { AuthService } from '../../core/services/auth.service';
+import { BookingService, SelectedSeat } from '../../core/services/booking.service';
+import { formatDate, formatTime } from '../../shared/utils/cinema-format.utils';
 
 interface Seat {
   seatRow: string;
   seatNumber: number;
   tier: string;
   available: boolean;
-  price: number;
-}
-
-interface SelectedSeat {
-  seatRow: string;
-  seatNumber: number;
   price: number;
 }
 
@@ -28,24 +22,25 @@ interface SelectedSeat {
 })
 export class SeatSelectionComponent implements OnInit {
   private screeningService = inject(ScreeningService);
-  private ticketService = inject(TicketService);
-  private authService = inject(AuthService);
+  private bookingService = inject(BookingService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   screening = signal<any>(null);
   seats = signal<Seat[]>([]);
-  selectedSeats = signal<SelectedSeat[]>([]);
   seatRows = signal<string[]>([]);
-  seatsPerRow = signal(10);
   loading = signal(true);
   error = signal<string | null>(null);
 
-  totalPrice = computed(() =>
-    this.selectedSeats().reduce((sum, s) => sum + s.price, 0)
-  );
+  // delegate selection state to the booking service
+  selectedSeats = this.bookingService.selectedSeats;
+  totalPrice = this.bookingService.totalPrice;
+
+  readonly formatDate = formatDate;
+  readonly formatTime = formatTime;
 
   ngOnInit(): void {
+    this.bookingService.clear();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       const screeningId = +id;
@@ -78,14 +73,9 @@ export class SeatSelectionComponent implements OnInit {
     });
   }
 
-  computeSeatRows(): void {
+  private computeSeatRows(): void {
     const rows = new Set(this.seats().map(s => s.seatRow));
-    const sortedRows = Array.from(rows).sort();
-    this.seatRows.set(sortedRows);
-    if (sortedRows.length > 0) {
-      const firstRow = this.seats().filter(s => s.seatRow === sortedRows[0]);
-      this.seatsPerRow.set(firstRow.length);
-    }
+    this.seatRows.set(Array.from(rows).sort());
   }
 
   getSeatsForRow(row: string): Seat[] {
@@ -98,43 +88,19 @@ export class SeatSelectionComponent implements OnInit {
 
   toggleSeat(seat: Seat): void {
     if (!seat.available) return;
-
-    this.selectedSeats.update(current => {
+    this.bookingService.selectedSeats.update(current => {
       const index = current.findIndex(s => s.seatRow === seat.seatRow && s.seatNumber === seat.seatNumber);
-      if (index >= 0) {
-        return current.filter((_, i) => i !== index);
-      } else {
-        return [...current, { seatRow: seat.seatRow, seatNumber: seat.seatNumber, price: seat.price }];
-      }
+      if (index >= 0) return current.filter((_, i) => i !== index);
+      return [...current, { seatRow: seat.seatRow, seatNumber: seat.seatNumber, price: seat.price }];
     });
   }
 
   proceedToCheckout(): void {
-    sessionStorage.setItem('selectedSeats', JSON.stringify(this.selectedSeats()));
-    sessionStorage.setItem('screeningId', this.screening().id.toString());
+    this.bookingService.screeningId.set(this.screening().id);
     this.router.navigate(['/checkout']);
   }
 
   cancel(): void {
     this.router.navigate(['/']);
-  }
-
-  formatDate(dateStr: string | undefined): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-GB', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  }
-
-  formatTime(dateStr: string | undefined): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
   }
 }

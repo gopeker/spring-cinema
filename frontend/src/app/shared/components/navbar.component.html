@@ -19,6 +19,9 @@
             <a class="nav-link" routerLink="/tickets">My Tickets</a>
           </li>
           <li class="nav-item">
+            <span class="nav-link text-muted">{{ auth.currentUser()?.name }}</span>
+          </li>
+          <li class="nav-item">
             <button class="btn btn-link nav-link" (click)="logout()">Logout</button>
           </li>
         } @else {

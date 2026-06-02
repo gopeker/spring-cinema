@@ -35,7 +35,7 @@ export class ChatbotComponent implements AfterViewChecked {
   private shouldScroll = true;
 
   constructor() {
-    this.movieService.getMovies().subscribe({
+    this.movieService.getAll().subscribe({
       next: (movies) => {
         this.allMovies = movies.map(m => ({ id: m.id, title: m.title }));
       }

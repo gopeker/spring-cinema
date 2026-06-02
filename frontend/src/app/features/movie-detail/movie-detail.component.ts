@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { MovieService } from '../../core/services/movie.service';
 import { ScreeningService } from '../../core/services/screening.service';
+import { formatTime, formatDuration } from '../../shared/utils/cinema-format.utils';
 
 @Component({
   selector: 'app-movie-detail',
@@ -95,22 +96,6 @@ export class MovieDetailComponent implements OnInit {
     );
   }
 
-  formatDuration(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0 && mins > 0) {
-      return `${hours}h ${mins}min`;
-    } else if (hours > 0) {
-      return `${hours}h`;
-    }
-    return `${mins}min`;
-  }
-
-  formatTime(dateString: string): string {
-    return new Date(dateString).toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-  }
+  readonly formatDuration = formatDuration;
+  readonly formatTime = formatTime;
 }

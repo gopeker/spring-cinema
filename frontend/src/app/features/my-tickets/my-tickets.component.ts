@@ -19,10 +19,9 @@ export class MyTicketsComponent implements OnInit {
 
   tickets = signal<any[]>([]);
   loading = signal(true);
-  user = signal<any>(null);
+  user = this.authService.currentUser;
 
   ngOnInit() {
-    this.user.set(this.authService.getUser());
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
