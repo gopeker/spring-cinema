@@ -4,25 +4,40 @@ import com.cinema.springcinema.dto.AuthResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
  * Base class for all integration tests.
  *
- * @IntegrationTest bundles @SpringBootTest, @Import(TestcontainersConfiguration)
- * and @DirtiesContext as a single composed annotation. Applying it here — rather
- * than only on the base class — means IntelliJ resolves the full Spring context
- * when a subclass is run directly, without relying on annotation inheritance.
+ * The PostgreSQL container is declared as a static @ServiceConnection field
+ * so Spring Boot auto-configures the datasource from it. This approach is
+ * fully supported by IntelliJ when running a single test class directly,
+ * because it does not rely on @Import propagation through annotation inheritance.
+ *
+ * @DirtiesContext (declared via @IntegrationTest) resets the context between
+ * test classes, giving each a clean database via ddl-auto=update.
  */
 @IntegrationTest
 public abstract class BaseIntegrationTest {
+
+    @ServiceConnection
+    @SuppressWarnings("resource")
+    static final PostgreSQLContainer postgres =
+            new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
+
+    static {
+        postgres.start();
+    }
 
     @Autowired
     private WebApplicationContext webApplicationContext;

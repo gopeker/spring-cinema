@@ -1,8 +1,7 @@
 package com.cinema.springcinema.integration;
 
-import com.cinema.springcinema.TestcontainersConfiguration;
+import com.cinema.springcinema.SpringCinemaApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.lang.annotation.ElementType;
@@ -13,15 +12,22 @@ import java.lang.annotation.Target;
 
 /**
  * Composed annotation for integration tests.
- * Bundles @SpringBootTest, @Import(TestcontainersConfiguration) and
- * @DirtiesContext so IntelliJ picks up the full context when running
- * a single test class directly.
+ *
+ * Explicitly references SpringCinemaApplication so IntelliJ can resolve
+ * the full Spring Boot auto-configuration context (including ObjectMapper,
+ * Security, JPA etc.) when a single test class is run directly.
+ *
+ * The PostgreSQL Testcontainer is declared as a static @ServiceConnection
+ * field on BaseIntegrationTest, which is the Spring Boot 4-idiomatic way
+ * to wire Testcontainers without @Import(TestcontainersConfiguration).
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Import(TestcontainersConfiguration.class)
+@SpringBootTest(
+        classes = SpringCinemaApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK
+)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public @interface IntegrationTest {
 }
