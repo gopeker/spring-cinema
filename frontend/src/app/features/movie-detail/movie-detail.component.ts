@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { MovieService } from '../../core/services/movie.service';
@@ -16,12 +16,11 @@ export class MovieDetailComponent implements OnInit {
   private screeningService = inject(ScreeningService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  movie: any = null;
-  screenings: any[] = [];
-  groupedScreenings: { date: string; screenings: any[] }[] = [];
-  loading = true;
+  movie = signal<any>(null);
+  screenings = signal<any[]>([]);
+  groupedScreenings = signal<{ date: string; screenings: any[] }[]>([]);
+  loading = signal(true);
   private loadCount = 0;
 
   ngOnInit(): void {
@@ -31,7 +30,7 @@ export class MovieDetailComponent implements OnInit {
         this.loadMovie(movieId);
         this.loadScreenings(movieId);
       } else {
-        this.loading = false;
+        this.loading.set(false);
       }
     });
   }
@@ -39,11 +38,11 @@ export class MovieDetailComponent implements OnInit {
   private loadMovie(id: number): void {
     this.movieService.getById(id).subscribe({
       next: (movie) => {
-        this.movie = movie;
+        this.movie.set(movie);
         this.finishLoad();
       },
       error: () => {
-        this.movie = null;
+        this.movie.set(null);
         this.finishLoad();
       }
     });
@@ -52,12 +51,12 @@ export class MovieDetailComponent implements OnInit {
   private loadScreenings(movieId: number): void {
     this.screeningService.getByMovie(movieId).subscribe({
       next: (screenings) => {
-        this.screenings = screenings;
+        this.screenings.set(screenings);
         this.groupScreenings(screenings);
         this.finishLoad();
       },
       error: () => {
-        this.screenings = [];
+        this.screenings.set([]);
         this.finishLoad();
       }
     });
@@ -66,8 +65,7 @@ export class MovieDetailComponent implements OnInit {
   private finishLoad(): void {
     this.loadCount++;
     if (this.loadCount >= 2) {
-      this.loading = false;
-      this.cdr.detectChanges();
+      this.loading.set(false);
     }
   }
 
@@ -89,10 +87,12 @@ export class MovieDetailComponent implements OnInit {
       groups.get(date)!.push(screening);
     });
 
-    this.groupedScreenings = Array.from(groups.entries()).map(([date, scrs]) => ({
-      date,
-      screenings: scrs.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-    }));
+    this.groupedScreenings.set(
+      Array.from(groups.entries()).map(([date, scrs]) => ({
+        date,
+        screenings: scrs.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      }))
+    );
   }
 
   formatDuration(minutes: number): string {

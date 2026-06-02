@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MovieService } from '../../core/services/movie.service';
@@ -12,10 +12,9 @@ import { MovieService } from '../../core/services/movie.service';
 })
 export class HomeComponent implements OnInit {
   private movieService = inject(MovieService);
-  private cdr = inject(ChangeDetectorRef);
 
-  movies: any[] = [];
-  loading = true;
+  movies = signal<any[]>([]);
+  loading = signal(true);
 
   ngOnInit(): void {
     this.loadMovies();
@@ -24,13 +23,11 @@ export class HomeComponent implements OnInit {
   private loadMovies(): void {
     this.movieService.getAll().subscribe({
       next: (movies) => {
-        this.movies = movies;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.movies.set(movies);
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       }
     });
   }

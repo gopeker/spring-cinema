@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -20,23 +20,21 @@ interface Message {
 })
 export class ChatbotComponent implements AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
-  private cdr = inject(ChangeDetectorRef);
-  messages: Message[] = [];
-  userInput = '';
-  loading = false;
-  private allMovies: { id: number; title: string }[] = [];
-  private shouldScroll = false;
 
-  constructor(
-    private chatbotService: ChatbotService,
-    private movieService: MovieService
-  ) {
-    this.messages.push({
-      role: 'bot',
-      content: 'Hi! I\'m your movie recommendation assistant. Tell me what kind of movies you like, and I\'ll suggest some great films for you to watch at Spring Cinema!'
-    });
-    this.shouldScroll = true;
-    
+  private chatbotService = inject(ChatbotService);
+  private movieService = inject(MovieService);
+
+  messages = signal<Message[]>([{
+    role: 'bot',
+    content: 'Hi! I\'m your movie recommendation assistant. Tell me what kind of movies you like, and I\'ll suggest some great films for you to watch at Spring Cinema!'
+  }]);
+  userInput = signal('');
+  loading = signal(false);
+
+  private allMovies: { id: number; title: string }[] = [];
+  private shouldScroll = true;
+
+  constructor() {
     this.movieService.getMovies().subscribe({
       next: (movies) => {
         this.allMovies = movies.map(m => ({ id: m.id, title: m.title }));
@@ -58,29 +56,30 @@ export class ChatbotComponent implements AfterViewChecked {
   }
 
   sendMessage(): void {
-    if (!this.userInput.trim() || this.loading) return;
+    if (!this.userInput().trim() || this.loading()) return;
 
-    const userMessage = this.userInput.trim();
-    this.messages.push({ role: 'user', content: userMessage });
+    const userMessage = this.userInput().trim();
+    this.messages.update(msgs => [...msgs, { role: 'user', content: userMessage }]);
     this.shouldScroll = true;
-    this.userInput = '';
-    this.loading = true;
+    this.userInput.set('');
+    this.loading.set(true);
 
     this.chatbotService.chat(userMessage).subscribe({
       next: (res: any) => {
         const responseText = res?.response || res?.message || 'No response';
         const movies = this.extractMovies(responseText);
-        this.messages.push({ role: 'bot', content: responseText, movies });
+        this.messages.update(msgs => [...msgs, { role: 'bot', content: responseText, movies }]);
         this.shouldScroll = true;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Chat error:', err);
-        this.messages.push({ role: 'bot', content: 'Sorry, I\'m having trouble connecting. Make sure LM Studio is running with Gemma 4 loaded.' });
+        this.messages.update(msgs => [...msgs, {
+          role: 'bot',
+          content: 'Sorry, I\'m having trouble connecting. Make sure LM Studio is running with Gemma 4 loaded.'
+        }]);
         this.shouldScroll = true;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       }
     });
   }

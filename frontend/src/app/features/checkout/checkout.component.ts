@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -25,36 +25,35 @@ export class CheckoutComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
   private screeningService = inject(ScreeningService);
-  private cdr = inject(ChangeDetectorRef);
 
-  selectedSeats: SelectedSeat[] = [];
-  screeningId: number = 0;
-  screening: any = null;
-  purchasedTickets: any[] = [];
-  loading = false;
-  error = '';
-  loginError = '';
+  selectedSeats = signal<SelectedSeat[]>([]);
+  screeningId = signal(0);
+  screening = signal<any>(null);
+  purchasedTickets = signal<any[]>([]);
+  loading = signal(false);
+  error = signal('');
+  loginError = signal('');
 
   email = '';
   password = '';
 
-  get totalPrice(): number {
-    return this.selectedSeats.reduce((sum, s) => sum + s.price, 0);
-  }
+  totalPrice = computed(() =>
+    this.selectedSeats().reduce((sum, s) => sum + s.price, 0)
+  );
 
   ngOnInit(): void {
     const stored = sessionStorage.getItem('selectedSeats');
     if (stored) {
-      this.selectedSeats = JSON.parse(stored);
+      this.selectedSeats.set(JSON.parse(stored));
       const storedScreeningId = sessionStorage.getItem('screeningId');
       if (storedScreeningId) {
-        this.screeningId = +storedScreeningId;
+        this.screeningId.set(+storedScreeningId);
         this.loadScreening();
       }
     } else {
       const purchasedScreening = sessionStorage.getItem('purchasedScreening');
       if (purchasedScreening) {
-        this.screening = JSON.parse(purchasedScreening);
+        this.screening.set(JSON.parse(purchasedScreening));
       } else {
         this.router.navigate(['/']);
       }
@@ -62,53 +61,50 @@ export class CheckoutComponent implements OnInit {
   }
 
   loadScreening(): void {
-    this.screeningService.getById(this.screeningId).subscribe({
+    this.screeningService.getById(this.screeningId()).subscribe({
       next: (data) => {
-        this.screening = data;
-        this.cdr.detectChanges();
+        this.screening.set(data);
       }
     });
   }
 
   login(): void {
-    this.loginError = '';
+    this.loginError.set('');
     this.authService.login(this.email, this.password).subscribe({
       next: (res) => {
         this.authService.saveToken(res.token);
         this.authService.saveUser(res.user);
       },
       error: () => {
-        this.loginError = 'Invalid email or password';
+        this.loginError.set('Invalid email or password');
       }
     });
   }
 
   confirmPurchase(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
-    const purchaseRequests = this.selectedSeats.map(seat => 
-      this.ticketService.purchase(this.screeningId, seat.seatRow, seat.seatNumber)
+    const purchaseRequests = this.selectedSeats().map(seat =>
+      this.ticketService.purchase(this.screeningId(), seat.seatRow, seat.seatNumber)
     );
 
     forkJoin(purchaseRequests).subscribe({
       next: (results) => {
-        this.purchasedTickets = results;
-        const screeningData = this.screening || { 
-          movie: { title: '', posterUrl: '' }, 
-          showroom: { name: '' }, 
-          startTime: '' 
+        this.purchasedTickets.set(results);
+        const screeningData = this.screening() || {
+          movie: { title: '', posterUrl: '' },
+          showroom: { name: '' },
+          startTime: ''
         };
         sessionStorage.setItem('purchasedScreening', JSON.stringify(screeningData));
         sessionStorage.removeItem('selectedSeats');
         sessionStorage.removeItem('screeningId');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: () => {
-        this.error = 'Failed to purchase tickets. Please try again.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Failed to purchase tickets. Please try again.');
+        this.loading.set(false);
       }
     });
   }

@@ -5,7 +5,7 @@
   </div>
   
   <div class="chatbot-messages" #messagesContainer>
-    @for (msg of messages; track $index) {
+    @for (msg of messages(); track $index) {
       <div class="message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
         <div class="message-content">{{ msg.content }}</div>
         @if (msg.movies && msg.movies.length > 0) {
@@ -19,7 +19,7 @@
         }
       </div>
     }
-    @if (loading) {
+    @if (loading()) {
       <div class="message bot">
         <div class="message-content loading">
           <span class="typing"></span>
@@ -33,12 +33,13 @@
   <div class="chatbot-input">
     <input 
       type="text" 
-      [(ngModel)]="userInput" 
+      [value]="userInput()"
+      (input)="userInput.set($any($event.target).value)"
       (keydown)="onKeyDown($event)"
       placeholder="Ask me about movies..."
-      [disabled]="loading"
+      [disabled]="loading()"
     >
-    <button (click)="sendMessage()" [disabled]="loading || !userInput.trim()">
+    <button (click)="sendMessage()" [disabled]="loading() || !userInput().trim()">
       <i class="bi bi-send"></i>
     </button>
   </div>

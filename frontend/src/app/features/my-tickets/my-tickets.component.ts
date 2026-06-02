@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -16,14 +16,13 @@ export class MyTicketsComponent implements OnInit {
   private ticketService = inject(TicketService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  tickets: any[] = [];
-  loading = true;
-  user: any = null;
+  tickets = signal<any[]>([]);
+  loading = signal(true);
+  user = signal<any>(null);
 
   ngOnInit() {
-    this.user = this.authService.getUser();
+    this.user.set(this.authService.getUser());
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
@@ -34,13 +33,11 @@ export class MyTicketsComponent implements OnInit {
   loadTickets() {
     this.ticketService.getMyTickets().subscribe({
       next: (data) => {
-        this.tickets = data;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.tickets.set(data);
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       }
     });
   }
@@ -49,7 +46,7 @@ export class MyTicketsComponent implements OnInit {
     if (confirm('Are you sure you want to cancel this ticket?')) {
       this.ticketService.cancel(ticketId).subscribe({
         next: () => {
-          this.tickets = this.tickets.filter(t => t.id !== ticketId);
+          this.tickets.update(current => current.filter(t => t.id !== ticketId));
         },
         error: () => {
           alert('Failed to cancel ticket');

@@ -1,18 +1,18 @@
 <div class="container py-4">
   <div class="page-header mb-4">
     <h1 class="page-title">My Tickets</h1>
-    @if (user) {
-      <p class="page-subtitle">Welcome back, {{ user.name }}</p>
+    @if (user()) {
+      <p class="page-subtitle">Welcome back, {{ user().name }}</p>
     }
   </div>
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading-container">
       <div class="spinner-border text-danger" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-  } @else if (tickets.length === 0) {
+  } @else if (tickets().length === 0) {
     <div class="empty-state">
       <i class="bi bi-ticket-perforated empty-icon"></i>
       <h3>No tickets yet</h3>
@@ -21,7 +21,7 @@
     </div>
   } @else {
     <div class="tickets-list">
-      @for (ticket of tickets; track ticket.id) {
+      @for (ticket of tickets(); track ticket.id) {
         <div class="ticket-card ticket-tear">
           <div class="ticket-poster">
             <img [src]="ticket.screening?.movie?.posterUrl || 'https://via.placeholder.com/80x120'" [alt]="ticket.screening?.movie?.title">

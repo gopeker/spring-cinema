@@ -3,13 +3,13 @@
   <p>Browse movies, choose your seats, and enjoy the show!</p>
 </div>
 
-@if (loading) {
+@if (loading()) {
   <div class="loading-spinner"></div>
 } @else {
   <section class="movies-section">
     <h2 class="section-title">Now Showing</h2>
     <div class="row g-4">
-      @for (movie of movies; track movie.id) {
+      @for (movie of movies(); track movie.id) {
         <div class="col-12 col-md-6 col-lg-4">
           <div class="card-cinema">
             @if (movie.posterUrl) {
