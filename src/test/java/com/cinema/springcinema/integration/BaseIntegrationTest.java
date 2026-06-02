@@ -1,15 +1,11 @@
 package com.cinema.springcinema.integration;
 
-import com.cinema.springcinema.TestcontainersConfiguration;
 import com.cinema.springcinema.dto.AuthResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,15 +16,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 /**
  * Base class for all integration tests.
  *
- * A single PostgreSQL Testcontainer is shared across all subclasses via
- * @ServiceConnection in TestcontainersConfiguration. Spring Boot reuses the
- * application context so the container starts once per test run.
- *
- * @DirtiesContext ensures a clean DB state for each test class.
+ * @IntegrationTest bundles @SpringBootTest, @Import(TestcontainersConfiguration)
+ * and @DirtiesContext as a single composed annotation. Applying it here — rather
+ * than only on the base class — means IntelliJ resolves the full Spring context
+ * when a subclass is run directly, without relying on annotation inheritance.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Import(TestcontainersConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@IntegrationTest
 public abstract class BaseIntegrationTest {
 
     @Autowired

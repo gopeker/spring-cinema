@@ -1,5 +1,7 @@
 package com.cinema.springcinema.integration;
 
+import com.cinema.springcinema.integration.IntegrationTest;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -8,6 +10,7 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@IntegrationTest
 class AuthControllerIT extends BaseIntegrationTest {
 
     // ─── Register ─────────────────────────────────────────────────────────────
