@@ -76,7 +76,7 @@ class TicketServiceTest {
     @Test
     void givenValidPurchaseRequest_whenPurchase_thenReturnsTicketDto() {
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "A", 1)).thenReturn(false);
-        when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
+        when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(screeningService.getSeats(1L)).thenReturn(availableSeats);
         when(ticketRepository.save(any(Ticket.class))).thenAnswer(inv -> {
@@ -103,7 +103,7 @@ class TicketServiceTest {
     @Test
     void givenNonExistentScreeningId_whenPurchase_thenThrowsException() {
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(999L, "A", 1)).thenReturn(false);
-        when(screeningRepository.findById(999L)).thenReturn(Optional.empty());
+        when(screeningRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ticketService.purchase(1L, 999L, "A", 1))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -116,7 +116,7 @@ class TicketServiceTest {
         pastScreening.setId(1L);
 
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "A", 1)).thenReturn(false);
-        when(screeningRepository.findById(1L)).thenReturn(Optional.of(pastScreening));
+        when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(pastScreening));
 
         assertThatThrownBy(() -> ticketService.purchase(1L, 1L, "A", 1))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -126,7 +126,7 @@ class TicketServiceTest {
     @Test
     void givenNonExistentUserId_whenPurchase_thenThrowsException() {
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "A", 1)).thenReturn(false);
-        when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
+        when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ticketService.purchase(999L, 1L, "A", 1))
@@ -137,7 +137,7 @@ class TicketServiceTest {
     @Test
     void givenInvalidSeatRowAndNumber_whenPurchase_thenThrowsException() {
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "Z", 99)).thenReturn(false);
-        when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
+        when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(screeningService.getSeats(1L)).thenReturn(availableSeats);
 
@@ -153,7 +153,7 @@ class TicketServiceTest {
         );
 
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "A", 1)).thenReturn(false);
-        when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
+        when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(screeningService.getSeats(1L)).thenReturn(seatsWithUnavailable);
 
@@ -188,7 +188,7 @@ class TicketServiceTest {
         Ticket ticket = new Ticket(screening, user, "A", 1, new BigDecimal("18.00"));
         ticket.setId(1L);
 
-        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(ticket));
         when(ticketRepository.save(any(Ticket.class))).thenReturn(ticket);
 
         ticketService.cancel(1L, 1L);
@@ -198,7 +198,7 @@ class TicketServiceTest {
 
     @Test
     void givenNonExistentTicketId_whenCancel_thenThrowsException() {
-        when(ticketRepository.findById(999L)).thenReturn(Optional.empty());
+        when(ticketRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ticketService.cancel(999L, 1L))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -210,7 +210,7 @@ class TicketServiceTest {
         Ticket ticket = new Ticket(screening, otherUser, "A", 1, new BigDecimal("18.00"));
         ticket.setId(1L);
 
-        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(ticket));
 
         assertThatThrownBy(() -> ticketService.cancel(1L, 1L))
                 .isInstanceOf(AccessDeniedException.class)
@@ -224,7 +224,7 @@ class TicketServiceTest {
         Ticket ticket = new Ticket(pastScreening, user, "A", 1, new BigDecimal("18.00"));
         ticket.setId(1L);
 
-        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(ticket));
 
         assertThatThrownBy(() -> ticketService.cancel(1L, 1L))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -237,7 +237,7 @@ class TicketServiceTest {
         ticket.setId(1L);
         ticket.setStatus(Ticket.Status.CANCELLED);
 
-        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(ticket));
         when(ticketRepository.save(any(Ticket.class))).thenReturn(ticket);
 
         ticketService.cancel(1L, 1L);

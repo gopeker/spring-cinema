@@ -42,7 +42,7 @@ public class TicketService {
             throw new IllegalArgumentException("Seat already taken");
         }
 
-        Screening screening = screeningRepository.findById(screeningId)
+        Screening screening = screeningRepository.findByIdWithDetails(screeningId)
                 .orElseThrow(() -> new IllegalArgumentException("Screening not found: " + screeningId));
 
         if (screening.getStartTime().isBefore(LocalDateTime.now())) {
@@ -72,7 +72,7 @@ public class TicketService {
 
     @Transactional
     public void cancel(Long ticketId, Long userId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
+        Ticket ticket = ticketRepository.findByIdWithDetails(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found: " + ticketId));
 
         if (!ticket.getUser().getId().equals(userId)) {
