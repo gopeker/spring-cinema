@@ -1,4 +1,4 @@
-package com.cinema.springcinema.config;
+package com.cinema.springcinema.controller;
 
 import java.util.Map;
 
