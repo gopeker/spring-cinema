@@ -70,13 +70,14 @@ class ScreeningControllerIT extends BaseIntegrationTest {
 
         mockMvc.perform(get("/api/screenings/" + screeningId + "/seats"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(greaterThan(0)))
-                .andExpect(jsonPath("$[0].seatRow").isNotEmpty())
-                .andExpect(jsonPath("$[0].seatNumber").isNumber())
-                .andExpect(jsonPath("$[0].available").isBoolean())
-                .andExpect(jsonPath("$[0].price").isNumber())
-                .andExpect(jsonPath("$[0].tier").isNotEmpty());
+                .andExpect(jsonPath("$.screening.id").value(screeningId))
+                .andExpect(jsonPath("$.seats").isArray())
+                .andExpect(jsonPath("$.seats.length()").value(greaterThan(0)))
+                .andExpect(jsonPath("$.seats[0].seatRow").isNotEmpty())
+                .andExpect(jsonPath("$.seats[0].seatNumber").isNumber())
+                .andExpect(jsonPath("$.seats[0].available").isBoolean())
+                .andExpect(jsonPath("$.seats[0].price").isNumber())
+                .andExpect(jsonPath("$.seats[0].tier").isNotEmpty());
     }
 
     @Test
@@ -87,6 +88,6 @@ class ScreeningControllerIT extends BaseIntegrationTest {
 
         mockMvc.perform(get("/api/screenings/" + screeningId + "/seats"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].tier", hasItems("PREMIUM", "STANDARD", "ECONOMY")));
+                .andExpect(jsonPath("$.seats[*].tier", hasItems("PREMIUM", "STANDARD", "ECONOMY")));
     }
 }

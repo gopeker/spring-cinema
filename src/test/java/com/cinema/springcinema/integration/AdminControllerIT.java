@@ -24,8 +24,8 @@ class AdminControllerIT extends BaseIntegrationTest {
         mockMvc.perform(get("/api/admin/movies")
                         .header("Authorization", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(greaterThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(greaterThanOrEqualTo(1)));
     }
 
     @Test
@@ -142,8 +142,8 @@ class AdminControllerIT extends BaseIntegrationTest {
         mockMvc.perform(get("/api/admin/screenings")
                         .header("Authorization", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(greaterThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(greaterThanOrEqualTo(1)));
     }
 
     @Test

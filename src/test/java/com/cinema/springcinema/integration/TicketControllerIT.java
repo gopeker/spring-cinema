@@ -25,7 +25,7 @@ class TicketControllerIT extends BaseIntegrationTest {
         String seatsJson = mockMvc.perform(get("/api/screenings/" + screeningId + "/seats"))
                 .andReturn().getResponse().getContentAsString();
 
-        var seats = objectMapper.readTree(seatsJson);
+        var seats = objectMapper.readTree(seatsJson).get("seats");
         for (var seat : seats) {
             if (seat.get("available").asBoolean()) {
                 return new long[]{
