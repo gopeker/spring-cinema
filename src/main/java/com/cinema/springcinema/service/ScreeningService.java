@@ -21,6 +21,7 @@ import com.cinema.springcinema.domain.Ticket;
 import com.cinema.springcinema.dto.MovieDto;
 import com.cinema.springcinema.dto.ScreeningCreateRequest;
 import com.cinema.springcinema.dto.ScreeningDto;
+import com.cinema.springcinema.dto.ScreeningSeatsDto;
 import com.cinema.springcinema.dto.SeatDto;
 import com.cinema.springcinema.dto.ShowroomDto;
 import com.cinema.springcinema.repository.MovieRepository;
@@ -73,7 +74,7 @@ public class ScreeningService {
                 .orElseThrow(() -> new IllegalArgumentException("Screening not found: " + id));
     }
 
-    public List<SeatDto> getSeats(Long screeningId) {
+    public ScreeningSeatsDto getSeats(Long screeningId) {
         Screening screening = screeningRepository.findByIdWithDetails(screeningId)
                 .orElseThrow(() -> new IllegalArgumentException("Screening not found: " + screeningId));
 
@@ -101,7 +102,7 @@ public class ScreeningService {
                 seats.add(new SeatDto(currentRow, seatNum, !soldSeat, price, tier));
             }
         }
-        return seats;
+        return new ScreeningSeatsDto(toDto(screening), seats);
     }
 
     @Transactional(readOnly = true)

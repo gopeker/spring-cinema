@@ -23,6 +23,7 @@ import com.cinema.springcinema.domain.Screening;
 import com.cinema.springcinema.domain.Showroom;
 import com.cinema.springcinema.domain.Ticket;
 import com.cinema.springcinema.domain.User;
+import com.cinema.springcinema.dto.ScreeningSeatsDto;
 import com.cinema.springcinema.dto.SeatDto;
 import com.cinema.springcinema.dto.TicketDto;
 import com.cinema.springcinema.repository.ScreeningRepository;
@@ -49,7 +50,7 @@ class TicketServiceTest {
     private Screening screening;
     private User user;
     private User otherUser;
-    private List<SeatDto> availableSeats;
+    private ScreeningSeatsDto screeningSeats;
 
     @BeforeEach
     void setUp() {
@@ -66,11 +67,18 @@ class TicketServiceTest {
         otherUser = new User("Jane Doe", "jane@example.com", "password", User.Role.USER);
         otherUser.setId(2L);
 
-        availableSeats = List.of(
-                new SeatDto("A", 1, true, new BigDecimal("18.00"), "PREMIUM"),
-                new SeatDto("A", 2, true, new BigDecimal("18.00"), "PREMIUM"),
-                new SeatDto("B", 1, true, new BigDecimal("15.00"), "STANDARD")
-        );
+        screeningSeats = new ScreeningSeatsDto(
+                new com.cinema.springcinema.dto.ScreeningDto(
+                        screening.getId(),
+                        new com.cinema.springcinema.dto.MovieDto(movie.getId(), movie.getTitle(), movie.getDescription(), movie.getDuration(), movie.getPosterUrl()),
+                        new com.cinema.springcinema.dto.ShowroomDto(showroom.getId(), showroom.getName(), showroom.getRows(), showroom.getSeatsPerRow(), showroom.getTotalSeats()),
+                        screening.getStartTime(),
+                        screening.getBasePrice()),
+                List.of(
+                        new SeatDto("A", 1, true, new BigDecimal("18.00"), "PREMIUM"),
+                        new SeatDto("A", 2, true, new BigDecimal("18.00"), "PREMIUM"),
+                        new SeatDto("B", 1, true, new BigDecimal("15.00"), "STANDARD")
+                ));
     }
 
     @Test
@@ -78,7 +86,7 @@ class TicketServiceTest {
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "A", 1)).thenReturn(false);
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(screeningService.getSeats(1L)).thenReturn(availableSeats);
+        when(screeningService.getSeats(1L)).thenReturn(screeningSeats);
         when(ticketRepository.save(any(Ticket.class))).thenAnswer(inv -> {
             Ticket t = inv.getArgument(0);
             t.setId(1L);
@@ -139,7 +147,7 @@ class TicketServiceTest {
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "Z", 99)).thenReturn(false);
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(screeningService.getSeats(1L)).thenReturn(availableSeats);
+        when(screeningService.getSeats(1L)).thenReturn(screeningSeats);
 
         assertThatThrownBy(() -> ticketService.purchase(1L, 1L, "Z", 99))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -148,9 +156,9 @@ class TicketServiceTest {
 
     @Test
     void givenUnavailableSeat_whenPurchase_thenThrowsException() {
-        List<SeatDto> seatsWithUnavailable = List.of(
+        ScreeningSeatsDto seatsWithUnavailable = new ScreeningSeatsDto(screeningSeats.screening(), List.of(
                 new SeatDto("A", 1, false, new BigDecimal("18.00"), "PREMIUM")
-        );
+        ));
 
         when(ticketRepository.existsByScreeningIdAndSeatRowAndSeatNumber(1L, "A", 1)).thenReturn(false);
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));

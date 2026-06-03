@@ -56,6 +56,11 @@ export interface Seat {
   tier: string;
 }
 
+export interface ScreeningSeats {
+  screening: Screening;
+  seats: Seat[];
+}
+
 // ─── Tickets ─────────────────────────────────────────────────────────────────
 
 export interface Ticket {

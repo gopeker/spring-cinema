@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cinema.springcinema.dto.ScreeningDto;
+import com.cinema.springcinema.dto.ScreeningSeatsDto;
 import com.cinema.springcinema.dto.SeatDto;
 import com.cinema.springcinema.service.ScreeningService;
 
@@ -43,7 +44,7 @@ public class ScreeningController {
     }
 
     @GetMapping("/{id}/seats")
-    public ResponseEntity<List<SeatDto>> getSeats(@PathVariable Long id) {
+    public ResponseEntity<ScreeningSeatsDto> getSeats(@PathVariable Long id) {
         return ResponseEntity.ok(screeningService.getSeats(id));
     }
 }

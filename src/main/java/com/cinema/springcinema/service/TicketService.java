@@ -52,7 +52,7 @@ public class TicketService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        List<SeatDto> seats = screeningService.getSeats(screeningId);
+        List<SeatDto> seats = screeningService.getSeats(screeningId).seats();
         SeatDto seat = seats.stream()
                 .filter(s -> s.seatRow().equals(seatRow) && s.seatNumber() == seatNumber)
                 .findFirst()

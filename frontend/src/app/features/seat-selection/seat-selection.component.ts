@@ -36,25 +36,15 @@ export class SeatSelectionComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       const screeningId = +id;
-      this.loadScreening(screeningId);
       this.loadSeats(screeningId);
     }
-  }
-
-  loadScreening(id: number): void {
-    this.screeningService.getById(id).subscribe({
-      next: (data) => this.screening.set(data),
-      error: () => {
-        this.error.set('Failed to load screening');
-        this.loading.set(false);
-      }
-    });
   }
 
   loadSeats(id: number): void {
     this.screeningService.getSeats(id).subscribe({
       next: (data) => {
-        this.seats.set(data);
+        this.screening.set(data.screening);
+        this.seats.set(data.seats);
         this.computeSeatRows();
         this.loading.set(false);
       },

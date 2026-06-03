@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Screening, Seat } from '../models/api.models';
+import { Screening, ScreeningSeats, Seat } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ScreeningService {
@@ -24,7 +24,7 @@ export class ScreeningService {
     return this.http.get<Screening>(`${this.baseUrl}/${id}`);
   }
 
-  getSeats(screeningId: number): Observable<Seat[]> {
-    return this.http.get<Seat[]>(`${this.baseUrl}/${screeningId}/seats`);
+  getSeats(screeningId: number): Observable<ScreeningSeats> {
+    return this.http.get<ScreeningSeats>(`${this.baseUrl}/${screeningId}/seats`);
   }
 }

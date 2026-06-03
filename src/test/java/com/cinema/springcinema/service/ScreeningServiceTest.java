@@ -33,6 +33,7 @@ import com.cinema.springcinema.domain.Showroom;
 import com.cinema.springcinema.domain.Ticket;
 import com.cinema.springcinema.dto.ScreeningCreateRequest;
 import com.cinema.springcinema.dto.ScreeningDto;
+import com.cinema.springcinema.dto.ScreeningSeatsDto;
 import com.cinema.springcinema.dto.SeatDto;
 import com.cinema.springcinema.repository.MovieRepository;
 import com.cinema.springcinema.repository.ScreeningRepository;
@@ -120,12 +121,13 @@ class ScreeningServiceTest {
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(ticketRepository.findByScreeningIdAndStatus(1L, Ticket.Status.CONFIRMED)).thenReturn(List.of());
 
-        List<SeatDto> result = screeningService.getSeats(1L);
+        ScreeningSeatsDto result = screeningService.getSeats(1L);
 
-        assertThat(result).hasSize(200);
-        assertThat(result.get(0).seatRow()).isEqualTo("A");
-        assertThat(result.get(0).seatNumber()).isEqualTo(1);
-        assertThat(result.get(0).available()).isTrue();
+        assertThat(result.seats()).hasSize(200);
+        assertThat(result.seats().get(0).seatRow()).isEqualTo("A");
+        assertThat(result.seats().get(0).seatNumber()).isEqualTo(1);
+        assertThat(result.seats().get(0).available()).isTrue();
+        assertThat(result.screening().id()).isEqualTo(1L);
     }
 
     @Test
@@ -134,9 +136,9 @@ class ScreeningServiceTest {
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(ticketRepository.findByScreeningIdAndStatus(1L, Ticket.Status.CONFIRMED)).thenReturn(List.of(soldTicket));
 
-        List<SeatDto> result = screeningService.getSeats(1L);
+        ScreeningSeatsDto result = screeningService.getSeats(1L);
 
-        SeatDto a1 = result.stream().filter(s -> s.seatRow().equals("A") && s.seatNumber() == 1).findFirst().orElse(null);
+        SeatDto a1 = result.seats().stream().filter(s -> s.seatRow().equals("A") && s.seatNumber() == 1).findFirst().orElse(null);
         assertThat(a1).isNotNull();
         assertThat(a1.available()).isFalse();
     }
@@ -146,9 +148,9 @@ class ScreeningServiceTest {
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(ticketRepository.findByScreeningIdAndStatus(1L, Ticket.Status.CONFIRMED)).thenReturn(List.of());
 
-        List<SeatDto> result = screeningService.getSeats(1L);
+        ScreeningSeatsDto result = screeningService.getSeats(1L);
 
-        SeatDto frontRowSeat = result.stream().filter(s -> s.seatRow().equals("A") && s.seatNumber() == 1).findFirst().orElse(null);
+        SeatDto frontRowSeat = result.seats().stream().filter(s -> s.seatRow().equals("A") && s.seatNumber() == 1).findFirst().orElse(null);
         assertThat(frontRowSeat).isNotNull();
         assertThat(frontRowSeat.tier()).isEqualTo("PREMIUM");
     }
@@ -158,9 +160,9 @@ class ScreeningServiceTest {
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(ticketRepository.findByScreeningIdAndStatus(1L, Ticket.Status.CONFIRMED)).thenReturn(List.of());
 
-        List<SeatDto> result = screeningService.getSeats(1L);
+        ScreeningSeatsDto result = screeningService.getSeats(1L);
 
-        SeatDto backRowSeat = result.stream().filter(s -> s.seatRow().equals("J") && s.seatNumber() == 1).findFirst().orElse(null);
+        SeatDto backRowSeat = result.seats().stream().filter(s -> s.seatRow().equals("J") && s.seatNumber() == 1).findFirst().orElse(null);
         assertThat(backRowSeat).isNotNull();
         assertThat(backRowSeat.tier()).isEqualTo("ECONOMY");
     }
@@ -170,9 +172,9 @@ class ScreeningServiceTest {
         when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(ticketRepository.findByScreeningIdAndStatus(1L, Ticket.Status.CONFIRMED)).thenReturn(List.of());
 
-        List<SeatDto> result = screeningService.getSeats(1L);
+        ScreeningSeatsDto result = screeningService.getSeats(1L);
 
-        SeatDto middleRowSeat = result.stream().filter(s -> s.seatRow().equals("E") && s.seatNumber() == 1).findFirst().orElse(null);
+        SeatDto middleRowSeat = result.seats().stream().filter(s -> s.seatRow().equals("E") && s.seatNumber() == 1).findFirst().orElse(null);
         assertThat(middleRowSeat).isNotNull();
         assertThat(middleRowSeat.tier()).isEqualTo("STANDARD");
     }
