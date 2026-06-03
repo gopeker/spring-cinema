@@ -1,0 +1,83 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Screenings</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="search-bar">
+      <mat-form-field appearance="outline">
+        <mat-label>Movie</mat-label>
+        <input matInput
+               [value]="movieSearch()"
+               [matAutocomplete]="movieAuto"
+               (input)="onMovieSearchChange($any($event.target).value)"
+               (keyup.enter)="onSearch()"
+               placeholder="Type to search movies...">
+        <mat-autocomplete #movieAuto="matAutocomplete" (optionSelected)="onMovieSelected($event.option.value)">
+          @for (movie of filteredMovies(); track movie.id) {
+            <mat-option [value]="movie.id">{{ movie.title }}</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Min Price (€)</mat-label>
+        <input matInput type="number" [ngModel]="searchMinPrice()" (ngModelChange)="searchMinPrice.set($event || undefined)" (keyup.enter)="onSearch()">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Max Price (€)</mat-label>
+        <input matInput type="number" [ngModel]="searchMaxPrice()" (ngModelChange)="searchMaxPrice.set($event || undefined)" (keyup.enter)="onSearch()">
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> Add Screening
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="spinner-center">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    <table mat-table [dataSource]="screenings()" matSort [matSortActive]="sortActive()" [matSortDirection]="sortDirection()" (matSortChange)="onSortChange($event)" class="w-100">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let s">{{ s.id }}</td>
+      </ng-container>
+      <ng-container matColumnDef="movie">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Movie</th>
+        <td mat-cell *matCellDef="let s">{{ s.movie.title }}</td>
+      </ng-container>
+      <ng-container matColumnDef="showroom">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Showroom</th>
+        <td mat-cell *matCellDef="let s">{{ s.showroom.name }}</td>
+      </ng-container>
+      <ng-container matColumnDef="startTime">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Start Time</th>
+        <td mat-cell *matCellDef="let s">{{ s.startTime | date:'medium' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="basePrice">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Base Price</th>
+        <td mat-cell *matCellDef="let s">€{{ s.basePrice }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let s">
+          <button mat-icon-button color="primary" (click)="openEditDialog(s)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteScreening(s.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    <mat-paginator [length]="totalElements()"
+                   [pageIndex]="pageIndex()"
+                   [pageSize]="pageSize()"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

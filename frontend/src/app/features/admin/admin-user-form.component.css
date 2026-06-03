@@ -1,0 +1,30 @@
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 500px;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+h4 {
+  margin: 8px 0 4px;
+  color: #555;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+mat-divider {
+  margin: 8px 0;
+}

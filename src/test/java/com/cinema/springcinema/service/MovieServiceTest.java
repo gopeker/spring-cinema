@@ -3,6 +3,7 @@ package com.cinema.springcinema.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.cinema.springcinema.domain.Movie;
 import com.cinema.springcinema.dto.MovieCreateRequest;
@@ -45,7 +52,7 @@ class MovieServiceTest {
 
     @Test
     void whenFindAll_thenReturnsAllMovies() {
-        when(movieRepository.findAll()).thenReturn(List.of(movie));
+        when(movieRepository.findAll(any(Sort.class))).thenReturn(List.of(movie));
 
         List<MovieDto> result = movieService.findAll();
 
@@ -55,7 +62,7 @@ class MovieServiceTest {
 
     @Test
     void whenFindAllWithNoMovies_thenReturnsEmptyList() {
-        when(movieRepository.findAll()).thenReturn(List.of());
+        when(movieRepository.findAll(any(Sort.class))).thenReturn(List.of());
 
         List<MovieDto> result = movieService.findAll();
 
@@ -139,10 +146,131 @@ class MovieServiceTest {
         Movie movie2 = new Movie("The Matrix", "Sci-fi classic", 136, "matrix-poster.jpg");
         movie2.setId(2L);
 
-        when(movieRepository.findAll()).thenReturn(List.of(movie, movie2));
+        when(movieRepository.findAll(any(Sort.class))).thenReturn(List.of(movie, movie2));
 
         List<MovieDto> result = movieService.findAll();
 
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void givenPageable_whenFindAllPageable_thenReturnsPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
+        Page<Movie> page = new PageImpl<>(List.of(movie), pageable, 1);
+        when(movieRepository.findAll(pageable)).thenReturn(page);
+
+        Page<MovieDto> result = movieService.findAll(pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).title()).isEqualTo("Inception");
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+    @Test
+    void givenEmptyPageable_whenFindAllPageable_thenReturnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(), pageable, 0);
+        when(movieRepository.findAll(pageable)).thenReturn(page);
+
+        Page<MovieDto> result = movieService.findAll(pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    void givenSecondPage_whenFindAllPageable_thenReturnsCorrectPage() {
+        Movie movie2 = new Movie("The Matrix", "Sci-fi", 136, "poster.jpg");
+        movie2.setId(2L);
+        Pageable pageable = PageRequest.of(1, 1);
+        Page<Movie> page = new PageImpl<>(List.of(movie2), pageable, 2);
+        when(movieRepository.findAll(pageable)).thenReturn(page);
+
+        Page<MovieDto> result = movieService.findAll(pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).title()).isEqualTo("The Matrix");
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void givenTitleAndDuration_whenSearch_thenReturnsMatchingMovies() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(movie), pageable, 1);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.search("Inception", null, 100, 200, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).title()).isEqualTo("Inception");
+    }
+
+    @Test
+    void givenNoSearchResults_whenSearch_thenReturnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(), pageable, 0);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.search("NonExistent", null, null, null, pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    void givenMinDurationOnly_whenSearch_thenReturnsMatchingMovies() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(movie), pageable, 1);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.search(null, null, 120, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void givenAllNullFilters_whenSearch_thenReturnsAllMovies() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(movie), pageable, 1);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.search(null, null, null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void givenSearchByName_whenSearchByName_thenReturnsMatchingMovies() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(movie), pageable, 1);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.searchByName("Inception", pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).title()).isEqualTo("Inception");
+    }
+
+    @Test
+    void givenSearchByNameNoMatch_whenSearchByName_thenReturnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movie> page = new PageImpl<>(List.of(), pageable, 0);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.searchByName("NonExistent", pageable);
+
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void givenSearchByNameWithPaging_whenSearchByName_thenReturnsCorrectPage() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Movie> page = new PageImpl<>(List.of(movie), pageable, 1);
+        when(movieRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<MovieDto> result = movieService.searchByName("Inception", pageable);
+
+        assertThat(result.getPageable().getPageSize()).isEqualTo(5);
+        assertThat(result.getTotalElements()).isEqualTo(1);
     }
 }

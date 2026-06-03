@@ -7,7 +7,12 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cinema.springcinema.domain.Movie;
 import com.cinema.springcinema.domain.Screening;
@@ -20,6 +25,7 @@ import com.cinema.springcinema.dto.SeatDto;
 import com.cinema.springcinema.dto.ShowroomDto;
 import com.cinema.springcinema.repository.MovieRepository;
 import com.cinema.springcinema.repository.ScreeningRepository;
+import com.cinema.springcinema.repository.ScreeningSpecifications;
 import com.cinema.springcinema.repository.ShowroomRepository;
 import com.cinema.springcinema.repository.TicketRepository;
 
@@ -39,8 +45,16 @@ public class ScreeningService {
         this.ticketRepository = ticketRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ScreeningDto> findAll() {
-        return screeningRepository.findUpcoming(LocalDateTime.now()).stream().map(this::toDto).toList();
+        return screeningRepository.findAll(Sort.by("id")).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ScreeningDto> findAll(Pageable pageable) {
+        return screeningRepository.findAll(pageable).map(this::toDto);
     }
 
     public List<ScreeningDto> findByMovieId(Long movieId) {
@@ -90,17 +104,30 @@ public class ScreeningService {
         return seats;
     }
 
+    @Transactional(readOnly = true)
+    public Page<ScreeningDto> search(Long movieId, LocalDateTime from, LocalDateTime to, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        Specification<Screening> spec = Specification
+                .where(ScreeningSpecifications.movieIdEquals(movieId))
+                .and(ScreeningSpecifications.startTimeAfter(from))
+                .and(ScreeningSpecifications.startTimeBefore(to))
+                .and(ScreeningSpecifications.basePriceBetween(minPrice, maxPrice));
+        return screeningRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    @Transactional
     public ScreeningDto create(ScreeningCreateRequest request) {
         Movie movie = movieRepository.findById(request.movieId())
                 .orElseThrow(() -> new IllegalArgumentException("Movie not found: " + request.movieId()));
         Showroom showroom = showroomRepository.findById(request.showroomId())
                 .orElseThrow(() -> new IllegalArgumentException("Showroom not found: " + request.showroomId()));
         Screening screening = new Screening(movie, showroom, request.startTime(), request.basePrice());
-        return toDto(screeningRepository.save(screening));
+        Screening saved = screeningRepository.save(screening);
+        return toDto(saved);
     }
 
+    @Transactional
     public ScreeningDto update(Long id, ScreeningCreateRequest request) {
-        Screening screening = screeningRepository.findById(id)
+        Screening screening = screeningRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new IllegalArgumentException("Screening not found: " + id));
         Movie movie = movieRepository.findById(request.movieId())
                 .orElseThrow(() -> new IllegalArgumentException("Movie not found: " + request.movieId()));
@@ -110,7 +137,8 @@ public class ScreeningService {
         screening.setShowroom(showroom);
         screening.setStartTime(request.startTime());
         screening.setBasePrice(request.basePrice());
-        return toDto(screeningRepository.save(screening));
+        Screening saved = screeningRepository.save(screening);
+        return toDto(saved);
     }
 
     public void delete(Long id) {

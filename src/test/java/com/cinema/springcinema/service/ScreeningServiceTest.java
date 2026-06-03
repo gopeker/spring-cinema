@@ -20,6 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.cinema.springcinema.domain.Movie;
 import com.cinema.springcinema.domain.Screening;
@@ -64,7 +70,7 @@ class ScreeningServiceTest {
 
     @Test
     void whenFindAll_thenReturnsUpcomingScreenings() {
-        when(screeningRepository.findUpcoming(any(LocalDateTime.class))).thenReturn(List.of(screening));
+        when(screeningRepository.findAll(any(Sort.class))).thenReturn(List.of(screening));
 
         List<ScreeningDto> result = screeningService.findAll();
 
@@ -207,7 +213,7 @@ class ScreeningServiceTest {
     @Test
     void givenValidUpdateRequest_whenUpdate_thenReturnsUpdatedScreening() {
         ScreeningCreateRequest request = new ScreeningCreateRequest(1L, 1L, LocalDateTime.now().plusDays(3), new BigDecimal("18.00"));
-        when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
+        when(screeningRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(screening));
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
         when(showroomRepository.findById(1L)).thenReturn(Optional.of(showroom));
         when(screeningRepository.save(any(Screening.class))).thenReturn(screening);
@@ -220,7 +226,7 @@ class ScreeningServiceTest {
     @Test
     void givenNonExistentScreeningId_whenUpdate_thenThrowsException() {
         ScreeningCreateRequest request = new ScreeningCreateRequest(1L, 1L, LocalDateTime.now().plusDays(2), new BigDecimal("15.00"));
-        when(screeningRepository.findById(999L)).thenReturn(Optional.empty());
+        when(screeningRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> screeningService.update(999L, request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -244,5 +250,131 @@ class ScreeningServiceTest {
         assertThatThrownBy(() -> screeningService.delete(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Screening not found: 999");
+    }
+
+    @Test
+    void givenPageable_whenFindAllPageable_thenReturnsPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(pageable)).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.findAll(pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).id()).isEqualTo(1L);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+    @Test
+    void givenEmptyPageable_whenFindAllPageable_thenReturnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(), pageable, 0);
+        when(screeningRepository.findAll(pageable)).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.findAll(pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    void givenSecondPage_whenFindAllPageable_thenReturnsCorrectPage() {
+        Screening screening2 = new Screening(movie, showroom, LocalDateTime.now().plusDays(5), new BigDecimal("20.00"));
+        screening2.setId(2L);
+        Pageable pageable = PageRequest.of(1, 1);
+        Page<Screening> page = new PageImpl<>(List.of(screening2), pageable, 2);
+        when(screeningRepository.findAll(pageable)).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.findAll(pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).id()).isEqualTo(2L);
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void givenMovieId_whenSearch_thenReturnsMatchingScreenings() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(1L, null, null, null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).movie().title()).isEqualTo("Inception");
+    }
+
+    @Test
+    void givenPriceRange_whenSearch_thenReturnsMatchingScreenings() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(null, null, null, new BigDecimal("10.00"), new BigDecimal("20.00"), pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void givenDateRange_whenSearch_thenReturnsMatchingScreenings() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(null, LocalDateTime.now(), LocalDateTime.now().plusDays(7), null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void givenAllFilters_whenSearch_thenReturnsMatchingScreenings() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(
+                1L,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(7),
+                new BigDecimal("10.00"),
+                new BigDecimal("20.00"),
+                pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void givenNoSearchResults_whenSearch_thenReturnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(), pageable, 0);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(999L, null, null, null, null, pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    void givenAllNullFilters_whenSearch_thenReturnsAllScreenings() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(null, null, null, null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void givenSearchWithPaging_whenSearch_thenReturnsCorrectPage() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Screening> page = new PageImpl<>(List.of(screening), pageable, 1);
+        when(screeningRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<ScreeningDto> result = screeningService.search(null, null, null, null, null, pageable);
+
+        assertThat(result.getPageable().getPageSize()).isEqualTo(5);
+        assertThat(result.getTotalElements()).isEqualTo(1);
     }
 }

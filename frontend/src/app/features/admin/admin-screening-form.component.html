@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>{{ data ? 'Edit Screening' : 'Add Screening' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-grid">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Movie</mat-label>
+      <input matInput
+             [formControl]="$any(form.get('movieId'))"
+             [matAutocomplete]="movieAuto"
+             [value]="movieSearch()"
+             (input)="onMovieSearchChange($any($event.target).value)"
+             placeholder="Type to search movies...">
+      <mat-autocomplete #movieAuto="matAutocomplete" (optionSelected)="onMovieSelected($event.option.value)">
+        @for (movie of filteredMovies(); track movie.id) {
+          <mat-option [value]="movie.id">{{ movie.title }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (form.get('movieId')?.invalid && form.get('movieId')?.touched) {
+        <mat-error>Movie is required</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Showroom</mat-label>
+      <mat-select formControlName="showroomId">
+        @for (showroom of showrooms(); track showroom.id) {
+          <mat-option [value]="showroom.id">{{ showroom.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('showroomId')?.invalid && form.get('showroomId')?.touched) {
+        <mat-error>Showroom is required</mat-error>
+      }
+    </mat-form-field>
+    <div class="row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Date</mat-label>
+        <input matInput [matDatepicker]="picker" [min]="minDate" [value]="startDate()" (dateChange)="onDateChange($event.value)">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Time</mat-label>
+        <input matInput type="time" [value]="startTimeStr()" (input)="onTimeChange($any($event.target).value)">
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Base Price (€)</mat-label>
+      <input matInput type="number" step="0.01" formControlName="basePrice">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="!canSave || saving()">Save</button>
+</mat-dialog-actions>

@@ -1,0 +1,30 @@
+.search-panel {
+  margin-bottom: 16px;
+  margin-top: 16px;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.search-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+}
+
+.spinner-center {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.w-100 {
+  width: 100%;
+}

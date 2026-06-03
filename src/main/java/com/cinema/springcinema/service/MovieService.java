@@ -1,13 +1,16 @@
 package com.cinema.springcinema.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.cinema.springcinema.domain.Movie;
 import com.cinema.springcinema.dto.MovieCreateRequest;
 import com.cinema.springcinema.dto.MovieDto;
 import com.cinema.springcinema.repository.MovieRepository;
+import com.cinema.springcinema.repository.MovieSpecifications;
 
 @Service
 public class MovieService {
@@ -18,8 +21,12 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public List<MovieDto> findAll() {
-        return movieRepository.findAll().stream().map(this::toDto).toList();
+    public java.util.List<MovieDto> findAll() {
+        return movieRepository.findAll(Sort.by("id")).stream().map(this::toDto).toList();
+    }
+
+    public Page<MovieDto> findAll(Pageable pageable) {
+        return movieRepository.findAll(pageable).map(this::toDto);
     }
 
     public MovieDto findById(Long id) {
@@ -40,6 +47,19 @@ public class MovieService {
         movie.setDuration(request.duration());
         movie.setPosterUrl(request.posterUrl());
         return toDto(movieRepository.save(movie));
+    }
+
+    public Page<MovieDto> search(String title, String description, Integer minDuration, Integer maxDuration, Pageable pageable) {
+        Specification<Movie> spec = Specification
+                .where(MovieSpecifications.titleContains(title))
+                .and(MovieSpecifications.descriptionContains(description))
+                .and(MovieSpecifications.durationBetween(minDuration, maxDuration));
+        return movieRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    public Page<MovieDto> searchByName(String name, Pageable pageable) {
+        Specification<Movie> spec = MovieSpecifications.titleContains(name);
+        return movieRepository.findAll(spec, pageable).map(this::toDto);
     }
 
     public void delete(Long id) {

@@ -1,0 +1,24 @@
+<mat-sidenav-container class="admin-container">
+  <mat-sidenav mode="side" opened class="admin-sidenav">
+    <mat-toolbar color="primary">
+      <span>Admin Panel</span>
+    </mat-toolbar>
+    <mat-nav-list>
+      <a mat-list-item routerLink="movies" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>movie</mat-icon>
+        <span matListItemTitle>Movies</span>
+      </a>
+      <a mat-list-item routerLink="screenings" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>event</mat-icon>
+        <span matListItemTitle>Screenings</span>
+      </a>
+      <a mat-list-item routerLink="users" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Users</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="admin-content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

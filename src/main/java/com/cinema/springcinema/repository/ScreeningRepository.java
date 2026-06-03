@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.cinema.springcinema.domain.Screening;
 
 @Repository
-public interface ScreeningRepository extends JpaRepository<Screening, Long> {
+public interface ScreeningRepository extends JpaRepository<Screening, Long>, JpaSpecificationExecutor<Screening> {
 
     @Query("SELECT s FROM Screening s JOIN FETCH s.movie JOIN FETCH s.showroom WHERE s.id = :id")
     Optional<Screening> findByIdWithDetails(@Param("id") Long id);

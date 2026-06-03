@@ -1,0 +1,99 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Users</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-expansion-panel class="search-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Search by Address</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="search-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput [ngModel]="search().name" (ngModelChange)="updateSearch({ name: $event })" (keydown)="onSearchKeydown($event)">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput [ngModel]="search().email" (ngModelChange)="updateSearch({ email: $event })" (keydown)="onSearchKeydown($event)">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Street</mat-label>
+          <input matInput [ngModel]="search().street" (ngModelChange)="updateSearch({ street: $event })" (keydown)="onSearchKeydown($event)">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>City</mat-label>
+          <input matInput [ngModel]="search().city" (ngModelChange)="updateSearch({ city: $event })" (keydown)="onSearchKeydown($event)">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Postal Code</mat-label>
+          <input matInput [ngModel]="search().postalCode" (ngModelChange)="updateSearch({ postalCode: $event })" (keydown)="onSearchKeydown($event)">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Country</mat-label>
+          <input matInput [ngModel]="search().country" (ngModelChange)="updateSearch({ country: $event })" (keydown)="onSearchKeydown($event)">
+        </mat-form-field>
+      </div>
+      <div class="search-actions">
+        <button mat-raised-button color="primary" (click)="doSearch()">Search</button>
+        <button mat-button (click)="clearSearch()">Clear</button>
+      </div>
+    </mat-expansion-panel>
+
+    <div class="toolbar">
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>person_add</mat-icon> Add User
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="spinner-center">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    <table mat-table [dataSource]="users()" matSort [matSortActive]="sortActive()" [matSortDirection]="sortDirection()" (matSortChange)="onSortChange($event)" class="w-100">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let u">{{ u.id }}</td>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let u">{{ u.name }}</td>
+      </ng-container>
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+        <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+      </ng-container>
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+        <td mat-cell *matCellDef="let u">
+          <mat-chip [color]="u.role === 'ADMIN' ? 'warn' : 'primary'" highlighted>{{ u.role }}</mat-chip>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="city">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
+        <td mat-cell *matCellDef="let u">{{ u.address?.city ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let u">
+          <button mat-icon-button color="primary" (click)="openEditDialog(u)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteUser(u.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    <mat-paginator [length]="totalElements()"
+                   [pageIndex]="pageIndex()"
+                   [pageSize]="pageSize()"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

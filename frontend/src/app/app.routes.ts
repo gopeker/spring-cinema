@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {authGuard} from './core/guards/auth.guard';
+import {authGuard, adminGuard} from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) },
@@ -10,5 +10,16 @@ export const routes: Routes = [
   { path: 'tickets', loadComponent: () => import('./features/my-tickets/my-tickets.component').then(m => m.MyTicketsComponent), canActivate: [authGuard] },
   { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent) },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/admin/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+    children: [
+      { path: '', redirectTo: 'movies', pathMatch: 'full' },
+      { path: 'movies', loadComponent: () => import('./features/admin/admin-movies.component').then(m => m.AdminMoviesComponent) },
+      { path: 'screenings', loadComponent: () => import('./features/admin/admin-screenings.component').then(m => m.AdminScreeningsComponent) },
+      { path: 'users', loadComponent: () => import('./features/admin/admin-users.component').then(m => m.AdminUsersComponent) }
+    ]
+  },
   { path: '**', redirectTo: '' }
 ];
