@@ -2,7 +2,7 @@ import { Component, inject, signal, ViewChild, ElementRef, afterNextRender, Inje
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ChatbotService } from '../../core/services/chatbot.service';
+import { ChatbotService, ChatHistoryEntry } from '../../core/services/chatbot.service';
 import { MovieService } from '../../core/services/movie.service';
 
 interface Message {
@@ -52,16 +52,29 @@ export class ChatbotComponent {
     }, { injector: this.injector });
   }
 
+  /** Build the history payload for the backend from current messages.
+   *  Maps frontend 'bot' role to 'assistant' as the API expects. */
+  private buildHistory(): ChatHistoryEntry[] {
+    return this.messages()
+      .filter(m => m.content !== this.messages()[0].content) // exclude greeting
+      .map(m => ({
+        role: m.role === 'user' ? 'user' : 'assistant' as const,
+        content: m.content
+      }));
+  }
+
   sendMessage(): void {
     if (!this.userInput().trim() || this.loading()) return;
 
     const userMessage = this.userInput().trim();
+    const history = this.buildHistory();
+
     this.messages.update(msgs => [...msgs, { role: 'user', content: userMessage }]);
     this.scheduleScroll();
     this.userInput.set('');
     this.loading.set(true);
 
-    this.chatbotService.chat(userMessage).subscribe({
+    this.chatbotService.chat(userMessage, history).subscribe({
       next: (res) => {
         const responseText = res.response || 'No response';
         const movies = this.extractMovies(responseText);

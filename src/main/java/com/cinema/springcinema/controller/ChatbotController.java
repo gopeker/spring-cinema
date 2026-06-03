@@ -1,14 +1,16 @@
 package com.cinema.springcinema.controller;
 
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cinema.springcinema.dto.ChatRequest;
+import com.cinema.springcinema.dto.ChatResponse;
 import com.cinema.springcinema.service.ChatbotService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/chatbot")
@@ -21,13 +23,8 @@ public class ChatbotController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> chat(@RequestBody Map<String, String> request) {
-        String userMessage = request.get("message");
-        if (userMessage == null || userMessage.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Message is required"));
-        }
-
-        String response = chatbotService.chat(userMessage);
-        return ResponseEntity.ok(Map.of("response", response));
+    public ResponseEntity<ChatResponse> chat(@Valid @RequestBody ChatRequest request) {
+        String response = chatbotService.chat(request.message(), request.safeHistory());
+        return ResponseEntity.ok(new ChatResponse(response));
     }
 }

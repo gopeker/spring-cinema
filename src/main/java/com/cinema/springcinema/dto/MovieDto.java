@@ -1,7 +1,5 @@
 package com.cinema.springcinema.dto;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record MovieDto(
