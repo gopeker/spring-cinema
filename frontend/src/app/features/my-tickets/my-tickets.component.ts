@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TicketService } from '../../core/services/ticket.service';
@@ -8,6 +9,7 @@ import { Ticket, Screening } from '../../core/models/api.models';
 @Component({
   selector: 'app-my-tickets',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink],
   templateUrl: './my-tickets.component.html',
   styleUrl: './my-tickets.component.css'
@@ -16,6 +18,7 @@ export class MyTicketsComponent implements OnInit {
   private ticketService = inject(TicketService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   tickets = signal<Ticket[]>([]);
   loading = signal(true);
@@ -30,7 +33,7 @@ export class MyTicketsComponent implements OnInit {
   }
 
   loadTickets() {
-    this.ticketService.getMyTickets().subscribe({
+    this.ticketService.getMyTickets().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.tickets.set(data);
         this.loading.set(false);

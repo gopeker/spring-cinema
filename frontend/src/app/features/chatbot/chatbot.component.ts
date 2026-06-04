@@ -1,4 +1,5 @@
-import { Component, inject, signal, ViewChild, ElementRef, afterNextRender, Injector } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, ViewChild, ElementRef, afterNextRender, Injector } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -14,6 +15,7 @@ interface Message {
 @Component({
   selector: 'app-chatbot',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './chatbot.component.html',
   styleUrl: './chatbot.component.css'
@@ -24,6 +26,7 @@ export class ChatbotComponent {
   private chatbotService = inject(ChatbotService);
   private movieService = inject(MovieService);
   private injector = inject(Injector);
+  private destroyRef = inject(DestroyRef);
 
   messages = signal<Message[]>([{
     role: 'bot',
@@ -35,7 +38,7 @@ export class ChatbotComponent {
   private allMovies: { id: number; title: string }[] = [];
 
   constructor() {
-    this.movieService.getAll().subscribe({
+    this.movieService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (movies) => {
         this.allMovies = movies.map(m => ({ id: m.id, title: m.title }));
       }
@@ -69,25 +72,34 @@ export class ChatbotComponent {
     const userMessage = this.userInput().trim();
     const history = this.buildHistory();
 
-    this.messages.update(msgs => [...msgs, { role: 'user', content: userMessage }]);
+    this.messages.update(msgs => {
+      const updated: Message[] = [...msgs, { role: 'user', content: userMessage }];
+      return updated.length > 100 ? updated.slice(-100) : updated;
+    });
     this.scheduleScroll();
     this.userInput.set('');
     this.loading.set(true);
 
-    this.chatbotService.chat(userMessage, history).subscribe({
+    this.chatbotService.chat(userMessage, history).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         const responseText = res.response || 'No response';
         const movies = this.extractMovies(responseText);
-        this.messages.update(msgs => [...msgs, { role: 'bot', content: responseText, movies }]);
+        this.messages.update(msgs => {
+          const updated: Message[] = [...msgs, { role: 'bot', content: responseText, movies }];
+          return updated.length > 100 ? updated.slice(-100) : updated;
+        });
         this.scheduleScroll();
         this.loading.set(false);
       },
       error: (err) => {
         console.error('Chat error:', err);
-        this.messages.update(msgs => [...msgs, {
-          role: 'bot',
-          content: 'Sorry, I\'m having trouble connecting. Make sure LM Studio is running with Gemma 4 loaded.'
-        }]);
+        this.messages.update(msgs => {
+          const updated: Message[] = [...msgs, {
+            role: 'bot',
+            content: 'Sorry, I\'m having trouble connecting. Make sure LM Studio is running with Gemma 4 loaded.'
+          }];
+          return updated.length > 100 ? updated.slice(-100) : updated;
+        });
         this.scheduleScroll();
         this.loading.set(false);
       }

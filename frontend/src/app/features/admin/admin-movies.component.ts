@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -15,10 +15,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AdminService } from '../../core/services/admin.service';
 import { MovieDto, MovieSearchParams, Page } from '../../core/models/api.models';
 import { AdminMovieFormComponent } from './admin-movie-form.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-admin-movies',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, FormsModule,
     MatTableModule, MatSortModule, MatPaginatorModule,
@@ -33,6 +35,7 @@ export class AdminMoviesComponent {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly movies = signal<MovieDto[]>([]);
   readonly loading = signal(false);
@@ -106,12 +109,16 @@ export class AdminMoviesComponent {
 
   openCreateDialog() {
     const ref = this.dialog.open(AdminMovieFormComponent, { width: '500px', data: null });
-    ref.afterClosed().subscribe(result => { if (result) this.loadMovies(); });
+    ref.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => { if (result) this.loadMovies(); });
   }
 
   openEditDialog(movie: MovieDto) {
     const ref = this.dialog.open(AdminMovieFormComponent, { width: '500px', data: movie });
-    ref.afterClosed().subscribe(result => { if (result) this.loadMovies(); });
+    ref.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => { if (result) this.loadMovies(); });
   }
 
   deleteMovie(id: number) {

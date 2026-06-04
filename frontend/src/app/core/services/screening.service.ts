@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 import { Screening, ScreeningSeats, Seat } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -9,11 +10,11 @@ export class ScreeningService {
   private baseUrl = '/api/screenings';
 
   getAll(): Observable<Screening[]> {
-    return this.http.get<Screening[]>(this.baseUrl);
+    return this.http.get<Screening[]>(this.baseUrl).pipe(shareReplay(1));
   }
 
   getByMovie(movieId: number): Observable<Screening[]> {
-    return this.http.get<Screening[]>(`${this.baseUrl}?movieId=${movieId}`);
+    return this.http.get<Screening[]>(`${this.baseUrl}?movieId=${movieId}`).pipe(shareReplay(1));
   }
 
   getByDate(date: string): Observable<Screening[]> {

@@ -90,7 +90,7 @@
         }
 
         <div class="d-flex gap-2">
-          <a routerLink="/seat-selection/{{screeningId()}}" class="btn btn-outline-secondary">Back to Seats</a>
+          <a routerLink="/screenings/{{screeningId()}}/seats" class="btn btn-outline-secondary">Back to Seats</a>
           <button class="btn btn-cinema" [disabled]="loading()" (click)="confirmPurchase()">
             @if (loading()) {
               <span class="spinner-border spinner-border-sm me-2"></span>

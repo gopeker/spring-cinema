@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -16,10 +16,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AdminService } from '../../core/services/admin.service';
 import { MovieDto, ScreeningDto, ScreeningSearchParams } from '../../core/models/api.models';
 import { AdminScreeningFormComponent } from './admin-screening-form.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-admin-screenings',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, FormsModule,
     MatTableModule, MatSortModule, MatPaginatorModule,
@@ -35,6 +37,7 @@ export class AdminScreeningsComponent {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly screenings = signal<ScreeningDto[]>([]);
   readonly loading = signal(false);
@@ -132,12 +135,16 @@ export class AdminScreeningsComponent {
 
   openCreateDialog() {
     const ref = this.dialog.open(AdminScreeningFormComponent, { width: '500px', data: null });
-    ref.afterClosed().subscribe(result => { if (result) this.loadScreenings(); });
+    ref.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => { if (result) this.loadScreenings(); });
   }
 
   openEditDialog(screening: ScreeningDto) {
     const ref = this.dialog.open(AdminScreeningFormComponent, { width: '500px', data: screening });
-    ref.afterClosed().subscribe(result => { if (result) this.loadScreenings(); });
+    ref.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => { if (result) this.loadScreenings(); });
   }
 
   deleteScreening(id: number) {

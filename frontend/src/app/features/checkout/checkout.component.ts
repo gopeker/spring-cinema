@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +14,7 @@ import { formatDate, formatTime } from '../../shared/utils/cinema-format.utils';
 @Component({
   selector: 'app-checkout',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.css'
@@ -23,6 +25,7 @@ export class CheckoutComponent implements OnInit {
   private router = inject(Router);
   private screeningService = inject(ScreeningService);
   private bookingService = inject(BookingService);
+  private destroyRef = inject(DestroyRef);
 
   selectedSeats = this.bookingService.selectedSeats;
   screeningId = this.bookingService.screeningId;
@@ -49,7 +52,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   loadScreening(): void {
-    this.screeningService.getById(this.screeningId()).subscribe({
+    this.screeningService.getById(this.screeningId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.screening.set(data)
     });
   }

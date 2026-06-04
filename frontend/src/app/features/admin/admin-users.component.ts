@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -17,10 +17,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AdminService } from '../../core/services/admin.service';
 import { UserDto, UserSearchRequest } from '../../core/models/api.models';
 import { AdminUserFormComponent } from './admin-user-form.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, FormsModule,
     MatTableModule, MatSortModule, MatPaginatorModule,
@@ -36,6 +38,7 @@ export class AdminUsersComponent {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly users = signal<UserDto[]>([]);
   readonly loading = signal(false);
@@ -133,12 +136,16 @@ export class AdminUsersComponent {
 
   openCreateDialog() {
     const ref = this.dialog.open(AdminUserFormComponent, { width: '600px', data: null });
-    ref.afterClosed().subscribe(result => { if (result) this.loadUsers(); });
+    ref.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => { if (result) this.loadUsers(); });
   }
 
   openEditDialog(user: UserDto) {
     const ref = this.dialog.open(AdminUserFormComponent, { width: '600px', data: user });
-    ref.afterClosed().subscribe(result => { if (result) this.loadUsers(); });
+    ref.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => { if (result) this.loadUsers(); });
   }
 
   deleteUser(id: number) {

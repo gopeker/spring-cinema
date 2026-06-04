@@ -1,6 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
+import { switchMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import { MovieService } from '../../core/services/movie.service';
 import { ScreeningService } from '../../core/services/screening.service';
 import { Movie, Screening, ScreeningGroup } from '../../core/models/api.models';
@@ -9,65 +12,47 @@ import { formatTime, formatDuration } from '../../shared/utils/cinema-format.uti
 @Component({
   selector: 'app-movie-detail',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink],
   templateUrl: './movie-detail.component.html',
   styleUrl: './movie-detail.component.css'
 })
-export class MovieDetailComponent implements OnInit {
+export class MovieDetailComponent {
   private movieService = inject(MovieService);
   private screeningService = inject(ScreeningService);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
   movie = signal<Movie | null>(null);
   screenings = signal<Screening[]>([]);
   groupedScreenings = signal<ScreeningGroup[]>([]);
   loading = signal(true);
-  private loadCount = 0;
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const movieId = +params['id'];
-      if (movieId) {
-        this.loadMovie(movieId);
-        this.loadScreenings(movieId);
-      } else {
-        this.loading.set(false);
-      }
-    });
-  }
-
-  private loadMovie(id: number): void {
-    this.movieService.getById(id).subscribe({
-      next: (movie) => {
-        this.movie.set(movie);
-        this.finishLoad();
-      },
-      error: () => {
-        this.movie.set(null);
-        this.finishLoad();
-      }
-    });
-  }
-
-  private loadScreenings(movieId: number): void {
-    this.screeningService.getByMovie(movieId).subscribe({
-      next: (screenings) => {
-        this.screenings.set(screenings);
-        this.groupScreenings(screenings);
-        this.finishLoad();
-      },
-      error: () => {
-        this.screenings.set([]);
-        this.finishLoad();
-      }
-    });
-  }
-
-  private finishLoad(): void {
-    this.loadCount++;
-    if (this.loadCount >= 2) {
-      this.loading.set(false);
-    }
+  constructor() {
+    this.route.params
+      .pipe(
+        switchMap(params => {
+          const id = +params['id'];
+          return forkJoin({
+            movie: this.movieService.getById(id),
+            screenings: this.screeningService.getByMovie(id)
+          });
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: ({ movie, screenings }) => {
+          this.movie.set(movie);
+          this.screenings.set(screenings);
+          this.groupScreenings(screenings);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.movie.set(null);
+          this.screenings.set([]);
+          this.loading.set(false);
+        }
+      });
   }
 
   private groupScreenings(screenings: Screening[]): void {

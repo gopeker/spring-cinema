@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -12,10 +12,12 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AdminService } from '../../core/services/admin.service';
 import { MovieDto, ShowroomDto, ScreeningDto } from '../../core/models/api.models';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-admin-screening-form',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule,
@@ -29,6 +31,7 @@ export class AdminScreeningFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
   private readonly snack = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
   readonly dialogRef = inject(MatDialogRef<AdminScreeningFormComponent>);
   readonly data: ScreeningDto | null = inject(MAT_DIALOG_DATA);
 
@@ -56,8 +59,12 @@ export class AdminScreeningFormComponent {
   });
 
   constructor() {
-    this.adminService.getMovies(undefined, 0, 100).subscribe(page => this.movies.set(page.content));
-    this.adminService.getShowrooms().subscribe(showrooms => this.showrooms.set(showrooms));
+    this.adminService.getMovies(undefined, 0, 100)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(page => this.movies.set(page.content));
+    this.adminService.getShowrooms()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(showrooms => this.showrooms.set(showrooms));
   }
 
   onMovieSearchChange(value: string) {
@@ -76,7 +83,7 @@ export class AdminScreeningFormComponent {
     this.startTimeStr.set(value);
   }
 
-  get isoDateTime(): string {
+  readonly isoDateTime = computed(() => {
     const date = this.startDate();
     const time = this.startTimeStr();
     if (!date || !time) return '';
@@ -84,18 +91,18 @@ export class AdminScreeningFormComponent {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}T${time}:00`;
-  }
+  });
 
-  get canSave(): boolean {
+  readonly canSave = computed(() => {
     return this.form.valid && !!this.startDate() && !!this.startTimeStr();
-  }
+  });
 
   save() {
-    if (!this.canSave) return;
+    if (!this.canSave()) return;
     this.saving.set(true);
     const req = {
       ...this.form.value,
-      startTime: this.isoDateTime
+      startTime: this.isoDateTime()
     };
     const obs = this.data
       ? this.adminService.updateScreening(this.data.id, req as any)

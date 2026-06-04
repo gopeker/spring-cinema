@@ -58,18 +58,18 @@
       <div class="seat-screen text-white mb-4">SCREEN</div>
 
       <div class="seat-grid" style="display: flex; flex-direction: column; gap: 8px;">
-        @for (row of seatRows(); track row) {
+        @for (rowEntry of rows(); track rowEntry[0]) {
           <div class="d-flex align-items-center justify-content-center gap-2">
-            <span class="row-label">{{ row }}</span>
+            <span class="row-label">{{ rowEntry[0] }}</span>
             <div class="d-flex gap-1 flex-wrap justify-content-center">
-              @for (seat of getSeatsForRow(row); track seat.seatRow + '-' + seat.seatNumber) {
+              @for (seat of rowEntry[1]; track seat.seatRow + '-' + seat.seatNumber) {
                 <button 
                   class="seat"
-                  [class.available]="seat.available && !isSelected(seat)"
-                  [class.selected]="isSelected(seat)"
+                  [class.available]="seat.available && !selectedSeatKeys().has(seat.seatRow + '-' + seat.seatNumber)"
+                  [class.selected]="selectedSeatKeys().has(seat.seatRow + '-' + seat.seatNumber)"
                   [class.taken]="!seat.available"
-                  [class.premium]="seat.tier === 'PREMIUM' && seat.available && !isSelected(seat)"
-                  [class.economy]="seat.tier === 'ECONOMY' && seat.available && !isSelected(seat)"
+                  [class.premium]="seat.tier === 'PREMIUM' && seat.available && !selectedSeatKeys().has(seat.seatRow + '-' + seat.seatNumber)"
+                  [class.economy]="seat.tier === 'ECONOMY' && seat.available && !selectedSeatKeys().has(seat.seatRow + '-' + seat.seatNumber)"
                   [disabled]="!seat.available"
                   (click)="toggleSeat(seat)"
                 >
