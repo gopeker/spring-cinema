@@ -80,7 +80,7 @@ public class DataSeeder {
                     142,
                     "https://image.tmdb.org/t/p/w500/zUWRCzac72YuO9k5kEWSe0aGbs7.jpg"));
 
-            LocalDateTime now = LocalDateTime.now().plusHours(2).withMinute(0).withSecond(0).withNano(0);
+            LocalDateTime now = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
 
             for (int day = 0; day < 7; day++) {
                 LocalDateTime base = now.plusDays(day);
