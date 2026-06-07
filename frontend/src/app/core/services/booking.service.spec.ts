@@ -7,6 +7,7 @@ describe('BookingService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(BookingService);
+    service.clear();
   });
 
   it('should be created', () => {

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -14,6 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class RegisterComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   name = '';
   email = '';
@@ -23,7 +24,10 @@ export class RegisterComponent {
   onSubmit() {
     this.error = '';
     this.auth.register(this.name, this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+        this.router.navigateByUrl(returnUrl);
+      },
       error: () => { this.error = 'Registration failed. Please try again.'; }
     });
   }

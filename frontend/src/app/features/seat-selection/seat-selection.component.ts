@@ -48,7 +48,6 @@ export class SeatSelectionComponent implements OnInit {
   readonly formatTime = formatTime;
 
   ngOnInit(): void {
-    this.bookingService.clear();
     this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const id = params['id'];
       if (id) {
