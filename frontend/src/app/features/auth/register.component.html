@@ -23,7 +23,7 @@
             <button type="submit" class="btn btn-cinema w-100">Register</button>
           </form>
           <p class="text-center mt-3">
-            Already have an account? <a routerLink="/login">Login</a>
+            Already have an account? <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl }">Login</a>
           </p>
         </div>
       </div>

@@ -20,7 +20,7 @@
           <div class="alert alert-danger">{{ loginError() }}</div>
         }
         <button class="btn btn-cinema me-2" (click)="login()">Log In</button>
-        <a routerLink="/register" class="btn btn-outline-secondary">Register</a>
+        <a routerLink="/register" [queryParams]="{ returnUrl: '/checkout' }" class="btn btn-outline-secondary">Register</a>
       </div>
     </div>
   }

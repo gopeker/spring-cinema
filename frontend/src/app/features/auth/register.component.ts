@@ -20,6 +20,7 @@ export class RegisterComponent {
   email = '';
   password = '';
   error = '';
+  readonly returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
 
   onSubmit() {
     this.error = '';

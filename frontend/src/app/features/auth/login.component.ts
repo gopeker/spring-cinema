@@ -19,6 +19,7 @@ export class LoginComponent {
   email = '';
   password = '';
   error = '';
+  readonly returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
 
   onSubmit() {
     this.error = '';
