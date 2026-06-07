@@ -28,6 +28,13 @@ docker compose down -v && docker compose up -d
 | PostgreSQL       | localhost:5432 |
 | Ollama           | http://localhost:11434 |
 
+## Dummy Users
+
+| User             | Password |
+|------------------|----------|
+| demo@cinema.com  | password |
+| admin@cinema.com | password |
+
 ## Chatbot
 
 Access the AI chatbot at: http://localhost/chatbot
